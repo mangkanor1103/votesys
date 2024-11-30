@@ -7,14 +7,13 @@ import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { FaLeaf } from 'react-icons/fa';
 
-
 export default function AuthenticatedLayout({ header, children }) {
     const user = usePage().props.auth.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     return (
-        <div className="min-h-screen bg-green-50 text-green-900">
-            <nav className="border-b bg-green-600 shadow-md">
+        <div className="min-h-screen bg-green-900 text-green-50">
+            <nav className="border-b bg-green-800 shadow-lg">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between items-center">
                         <div className="flex items-center">
@@ -25,22 +24,20 @@ export default function AuthenticatedLayout({ header, children }) {
 
                             <div className="hidden space-x-8 sm:flex sm:ml-10">
                                 <NavLink
-                                    href={route('dashboard')} // Ensure this points to the correct route for the dashboard
+                                    href={route('dashboard')}
                                     active={route().current('dashboard')}
-                                    className="text-green-100 hover:text-green-300"
+                                    className="text-green-200 hover:text-green-400"
                                 >
                                     Dashboard
                                 </NavLink>
 
-                                {/* New Elections link */}
                                 <NavLink
-                                    href={route('superadmin.elections')} // Ensure this points to the correct route for Elections management
+                                    href={route('superadmin.elections')}
                                     active={route().current('superadmin.elections')}
-                                    className="text-green-100 hover:text-green-300"
+                                    className="text-green-200 hover:text-green-400"
                                 >
                                     Elections
                                 </NavLink>
-
                             </div>
                         </div>
 
@@ -95,37 +92,35 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
 
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
-                    <div className="space-y-1 py-2 bg-green-50">
+                    <div className="space-y-1 py-2 bg-green-800">
                         <ResponsiveNavLink
                             href={route('dashboard')}
                             active={route().current('dashboard')}
-                            className="text-green-600 hover:text-green-800"
+                            className="text-green-200 hover:text-green-400"
                         >
                             Dashboard
                         </ResponsiveNavLink>
 
-                        {/* Responsive view for the Elections link */}
                         <ResponsiveNavLink
                             href={route('superadmin.elections')}
                             active={route().current('superadmin.elections')}
-                            className="text-green-600 hover:text-green-800"
+                            className="text-green-200 hover:text-green-400"
                         >
                             Elections
                         </ResponsiveNavLink>
-
                     </div>
 
-                    <div className="border-t border-green-200 py-4 bg-green-50">
+                    <div className="border-t border-green-300 py-4 bg-green-800">
                         <div className="px-4">
-                            <div className="text-base font-medium text-green-900">{user.name}</div>
-                            <div className="text-sm font-medium text-green-700">{user.email}</div>
+                            <div className="text-base font-medium text-green-50">{user.name}</div>
+                            <div className="text-sm font-medium text-green-300">{user.email}</div>
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')} className="text-green-600 hover:text-green-800">
+                            <ResponsiveNavLink href={route('profile.edit')} className="text-green-200 hover:text-green-400">
                                 Profile
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink method="post" href={route('logout')} as="button" className="text-green-600 hover:text-green-800">
+                            <ResponsiveNavLink method="post" href={route('logout')} as="button" className="text-green-200 hover:text-green-400">
                                 Log Out
                             </ResponsiveNavLink>
                         </div>
@@ -134,14 +129,14 @@ export default function AuthenticatedLayout({ header, children }) {
             </nav>
 
             {header && (
-                <header className="bg-green-600 shadow-md">
+                <header className="bg-green-800 shadow-md">
                     <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
                         <h1 className="text-xl font-semibold text-green-50">{header}</h1>
                     </div>
                 </header>
             )}
 
-            <main className="bg-green-50">
+            <main className="bg-green-900">
                 <div className="mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-8">
                     {children}
                 </div>

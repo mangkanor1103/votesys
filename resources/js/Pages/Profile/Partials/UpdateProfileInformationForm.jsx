@@ -20,23 +20,23 @@ export default function UpdateProfileInformation({
 
     const submit = (e) => {
         e.preventDefault();
-
         patch(route('profile.update'));
     };
 
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-900">
                     Profile Information
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="mt-2 text-sm text-gray-600">
                     Update your account's profile information and email address.
                 </p>
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-6">
+                {/* Name Field */}
                 <div>
                     <InputLabel htmlFor="name" value="Name" />
 
@@ -53,6 +53,7 @@ export default function UpdateProfileInformation({
                     <InputError className="mt-2" message={errors.name} />
                 </div>
 
+                {/* Email Field */}
                 <div>
                     <InputLabel htmlFor="email" value="Email" />
 
@@ -69,6 +70,7 @@ export default function UpdateProfileInformation({
                     <InputError className="mt-2" message={errors.email} />
                 </div>
 
+                {/* Email Verification Section */}
                 {mustVerifyEmail && user.email_verified_at === null && (
                     <div>
                         <p className="mt-2 text-sm text-gray-800">
@@ -85,13 +87,13 @@ export default function UpdateProfileInformation({
 
                         {status === 'verification-link-sent' && (
                             <div className="mt-2 text-sm font-medium text-green-600">
-                                A new verification link has been sent to your
-                                email address.
+                                A new verification link has been sent to your email address.
                             </div>
                         )}
                     </div>
                 )}
 
+                {/* Save Button & Success Message */}
                 <div className="flex items-center gap-4">
                     <PrimaryButton disabled={processing}>Save</PrimaryButton>
 

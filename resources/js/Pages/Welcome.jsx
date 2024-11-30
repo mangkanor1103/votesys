@@ -1,3 +1,4 @@
+import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa'; // Icons
 import { Head, Link } from '@inertiajs/react';
 import { CSSTransition } from 'react-transition-group';
 import { useState } from 'react';
@@ -41,7 +42,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                         onMouseEnter={() => handleHover('submit')}
                         onMouseLeave={handleLeave}
                     >
-                        <i className="fas fa-check" style={styles.btnIcon}></i> Submit
+                        <FaRegFlag style={styles.btnIcon} /> Submit
                     </button>
 
                     {/* Sub Admin Button */}
@@ -52,7 +53,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                         classNames="fade"
                     >
                         <Link
-                            href={route('subAdmin.login')}  // Ensure this matches the route name in your Laravel routing
+                            href={route('subAdmin.login')}
                             style={
                                 hoveredButton === 'subAdmin'
                                     ? { ...styles.btn, ...styles.btnHover }
@@ -61,7 +62,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             onMouseEnter={() => handleHover('subAdmin')}
                             onMouseLeave={handleLeave}
                         >
-                            <i className="fas fa-user-shield" style={styles.btnIcon}></i> Sub Admin
+                            <FaUsers style={styles.btnIcon} /> Sub Admin
                         </Link>
                     </CSSTransition>
 
@@ -82,7 +83,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             onMouseEnter={() => handleHover('superAdmin')}
                             onMouseLeave={handleLeave}
                         >
-                            <i className="fas fa-user-shield" style={styles.btnIcon}></i> Super Admin
+                            <FaChalkboardTeacher style={styles.btnIcon} /> Super Admin
                         </Link>
                     </CSSTransition>
                 </div>
@@ -110,46 +111,47 @@ const styles = {
         alignItems: 'center',
         height: '100vh',
         margin: 0,
-        background: 'linear-gradient(135deg, #2e8b57 0%, #32cd32 100%)',
+        background: 'radial-gradient(circle, #e6f9e6 0%, #b7e3b7 100%)', // Light green gradient
         fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
         overflow: 'hidden',
         padding: '10px',
     },
     container: {
         textAlign: 'center',
-        backgroundColor: '#fff',
-        padding: '30px',
-        borderRadius: '20px',
-        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.1)',
+        background: 'linear-gradient(135deg, rgba(230, 244, 230, 0.9), rgba(204, 240, 204, 0.95))',
+        color: '#333',
+        padding: '40px',
+        borderRadius: '25px',
+        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.2)',
         width: '100%',
-        maxWidth: '400px',
+        maxWidth: '450px',
         transition: 'transform 0.3s ease-in-out',
-        animation: 'fadeIn 1s ease-out', // Added animation for container fade-in
+        animation: 'fadeIn 1s ease-out',
+        backdropFilter: 'blur(10px)',
     },
     title: {
-        fontSize: '28px',
-        color: '#2d3436',
-        marginBottom: '20px',
+        fontSize: '32px',
         fontWeight: 'bold',
-        letterSpacing: '2px',
-        textShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
-        transition: 'color 0.3s ease', // Smooth transition for title color
+        letterSpacing: '3px',
+        textShadow: '0 2px 10px rgba(80, 160, 80, 0.5)',
+        marginBottom: '30px',
     },
     inputGroup: {
-        marginBottom: '20px',
+        marginBottom: '30px',
     },
     input: {
-        padding: '12px',
+        padding: '14px',
         width: '100%',
         fontSize: '16px',
-        border: '2px solid #ddd',
-        borderRadius: '12px',
-        background: '#f9f9f9',
-        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
+        border: '2px solid #66b266', // Green border
+        borderRadius: '15px',
+        background: 'rgba(255, 255, 255, 0.9)',
+        color: '#333',
+        boxShadow: '0 4px 15px rgba(80, 160, 80, 0.2)',
         transition: 'box-shadow 0.3s ease, border-color 0.3s ease',
         outline: 'none',
-        marginBottom: '20px',
         fontFamily: 'Arial, sans-serif',
+        caretColor: '#4caf50', // Green caret
     },
     buttons: {
         display: 'flex',
@@ -159,46 +161,43 @@ const styles = {
         alignItems: 'center',
     },
     btn: {
-        backgroundColor: '#2e8b57',
-        color: '#fff',
-        padding: '12px 24px',
-        fontSize: '16px',
+        backgroundColor: '#66b266', // Green button
+        color: '#333',
+        padding: '14px 28px',
+        fontSize: '18px',
         border: 'none',
-        borderRadius: '30px',
+        borderRadius: '35px',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '10px',
-        boxShadow: '0 5px 15px rgba(0, 0, 0, 0.2)',
+        gap: '12px',
+        boxShadow: '0 6px 20px rgba(0, 0, 0, 0.2)',
         transition: 'transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease',
         fontFamily: 'Arial, sans-serif',
+        textTransform: 'uppercase',
     },
     btnHover: {
-        backgroundColor: '#32cd32',
+        backgroundColor: '#4caf50', // Darker green on hover
         transform: 'scale(1.1)',
-        boxShadow: '0 8px 20px rgba(0, 0, 0, 0.3)',
-        animation: 'pulse 1s infinite', // Added pulse animation on hover
+        boxShadow: '0 10px 30px rgba(80, 160, 80, 0.4)',
+        animation: 'pulse 1s infinite',
     },
     btnIcon: {
-        fontSize: '18px',
+        fontSize: '20px',
         transition: 'transform 0.3s ease',
     },
     contactInfo: {
-        marginTop: '20px',
+        marginTop: '25px',
         fontSize: '14px',
-        color: '#888',
-        animation: 'fadeIn 1.5s ease-out', // Added fade-in animation for contact info
+        color: '#558855', // Green contact text
+        animation: 'fadeIn 1.5s ease-out',
     },
     contactLink: {
-        color: '#2e8b57',
+        color: '#4caf50',
         textDecoration: 'underline',
         transition: 'color 0.3s ease',
     },
-};
-
-// Keyframes for animations
-const globalStyles = {
     '@keyframes fadeIn': {
         '0%': { opacity: 0 },
         '100%': { opacity: 1 },
