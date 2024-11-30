@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import axios from 'axios';
 import { FaUser } from 'react-icons/fa';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
@@ -7,10 +9,25 @@ import GuestLayout from '@/Layouts/GuestLayout';
 import { Head } from '@inertiajs/react';
 
 export default function Login({ status }) {
+    const [electionCode, setElectionCode] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
-    const handleRedirect = (e) => {
+    const handleRedirect = async (e) => {
         e.preventDefault(); // Prevent form submission
-        window.location.href = '/subdashboard'; // Directly links to the dashboard
+
+        try {
+            const response = await axios.post('/validate-election-code', {
+                election_code: electionCode,
+            });
+
+            if (response.data.success) {
+                window.location.href = '/subdashboard'; // Redirect if successful
+            }
+        } catch (error) {
+            setErrorMessage(
+                error.response?.data?.message || 'An error occurred. Please try again.'
+            );
+        }
     };
 
     return (
@@ -29,7 +46,7 @@ export default function Login({ status }) {
                 </h1>
 
                 {/* Display the Election Code input field */}
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleRedirect}>
                     <div className="relative">
                         <InputLabel htmlFor="election_code" value="Election Code" />
                         <div className="flex items-center border border-green-300 rounded-md shadow-sm p-2 transition-colors focus-within:border-green-500">
@@ -40,18 +57,18 @@ export default function Login({ status }) {
                                 name="election_code"
                                 className="w-full outline-none"
                                 autoComplete="off"
+                                value={electionCode}
+                                onChange={(e) => setElectionCode(e.target.value)}
                                 isFocused={true}
-                                readOnly
                             />
                         </div>
-                        <InputError message="" className="mt-2" />
+                        <InputError message={errorMessage} className="mt-2" />
                     </div>
 
-                    {/* Button that redirects directly to the dashboard */}
+                    {/* Button that validates and redirects */}
                     <div className="flex items-center justify-between">
                         <PrimaryButton
                             className="bg-green-600 hover:bg-green-500 text-white rounded-md shadow-md focus:ring-4 focus:ring-green-300 transition-all"
-                            onClick={handleRedirect} // Prevent form submission and redirect
                         >
                             Go to Dashboard
                         </PrimaryButton>

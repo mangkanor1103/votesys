@@ -13,6 +13,8 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 
 // routes/web.php
+Route::post('/validate-election-code', [ElectionController::class, 'validateElectionCode'])->name('validate.election.code');
+
 
 Route::get('/subdashboard', function () {
     return Inertia::render('SubAdmin/SubDashboard');

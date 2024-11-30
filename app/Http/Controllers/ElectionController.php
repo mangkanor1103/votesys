@@ -119,4 +119,20 @@ public function showDashboard($id)
         // Generate a code with 4 random uppercase letters followed by 4 digits
         return strtoupper(Str::random(4)) . '-' . rand(1000, 9999);
     }
+
+    public function validateElectionCode(Request $request)
+    {
+        $request->validate([
+            'election_code' => 'required|string',
+        ]);
+
+            $election = Election::where('election_code', $request->election_code)->first();
+
+        if ($election) {
+            return response()->json(['success' => true]);
+         }
+
+        return response()->json(['success' => false, 'message' => 'Invalid election code.'], 400);
+    }
+
 }
