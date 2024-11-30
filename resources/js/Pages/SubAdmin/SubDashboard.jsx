@@ -1,8 +1,14 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import React from 'react';
 import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa'; // Icons
 
 export default function Welcome() {
+    const { post } = useForm();
+
+    const handleLogout = () => {
+        post(route('logout'));
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-500 to-teal-500">
             <Head title="Welcome" />
@@ -42,7 +48,10 @@ export default function Welcome() {
                             >
                                 <FaChalkboardTeacher className="text-xl" /> Manage Candidates
                             </Link>
-                            <button className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300">
+                            <button
+                                onClick={handleLogout} // Call logout on button click
+                                className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
+                            >
                                 <FaSignOutAlt className="text-xl" /> Logout
                             </button>
                         </div>

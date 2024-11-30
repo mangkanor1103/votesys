@@ -1,9 +1,17 @@
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import React from 'react';
 import { Link } from '@inertiajs/react'; // Inertia Link component
 import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa'; // Icons
 
 export default function ManagePositions() {
+    // Use Inertia's useForm hook for handling the logout action
+    const { post } = useForm();
+
+    // Function to handle logout
+    const handleLogout = () => {
+        post(route('logout')); // Send POST request to the logout route
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-500 to-teal-500">
             <Head title="Manage Positions" />
@@ -43,7 +51,12 @@ export default function ManagePositions() {
                             >
                                 <FaChalkboardTeacher className="text-xl" /> Manage Candidates
                             </Link>
-                            <button className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300">
+
+                            {/* Logout Button */}
+                            <button
+                                onClick={handleLogout}
+                                className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
+                            >
                                 <FaSignOutAlt className="text-xl" /> Logout
                             </button>
                         </div>

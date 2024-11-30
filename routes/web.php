@@ -10,6 +10,12 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\SubAdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use Illuminate\Support\Facades\Auth;
+
+Route::post('/logout', function () {
+    Auth::logout(); // Log the user out
+    return redirect('/sub-admin/login'); // Redirect to home or login page
+})->name('logout');
 
 
 // routes/web.php

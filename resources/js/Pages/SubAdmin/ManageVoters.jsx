@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import React from 'react';
-import { FaUsers, FaHome, FaRegFlag, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa'; // Import missing icons
+import { FaUsers, FaHome, FaRegFlag, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa'; // Import necessary icons
 import { Link } from '@inertiajs/react'; // Add the Link import
 
 export default function ManageVoters() {
