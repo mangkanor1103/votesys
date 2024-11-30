@@ -1,91 +1,63 @@
-import { useState } from 'react';
-import { useForm } from '@inertiajs/react'; // Inertia useForm hook
+import { FaUser } from 'react-icons/fa';
+import InputError from '@/Components/InputError';
+import InputLabel from '@/Components/InputLabel';
+import PrimaryButton from '@/Components/PrimaryButton';
+import TextInput from '@/Components/TextInput';
+import GuestLayout from '@/Layouts/GuestLayout';
+import { Head } from '@inertiajs/react';
 
-export default function Login() {
-    // Form setup with Inertia's useForm hook
-    const { data, setData, post, errors, processing } = useForm({
-        election_code: '',
-    });
+export default function Login({ status }) {
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        post('/sub-admin/login'); // Submit the form to the sub-admin login route
+    const handleRedirect = (e) => {
+        e.preventDefault(); // Prevent form submission
+        window.location.href = '/subdashboard'; // Directly links to the dashboard
     };
 
     return (
-        <div style={styles.body}>
-            <div style={styles.container}>
-                <h1 style={styles.title}>Sub Admin Login</h1>
-                <form onSubmit={handleSubmit}>
-                    <div style={styles.inputGroup}>
-                        <input
-                            type="text"
-                            placeholder="Enter Election Code"
-                            value={data.election_code}
-                            onChange={(e) => setData('election_code', e.target.value)}
-                            style={styles.input}
-                        />
+        <GuestLayout>
+            <Head title="Sub Admin Login" />
+
+            <div className="max-w-md mx-auto bg-white shadow-lg rounded-lg p-6 mt-6 border border-green-200">
+                {status && (
+                    <div className="mb-4 text-center text-sm font-medium text-green-600">
+                        {status}
                     </div>
-                    {/* Show validation error if exists */}
-                    {errors.election_code && <p style={styles.error}>{errors.election_code}</p>}
-                    <button type="submit" style={styles.btn} disabled={processing}>
-                        {processing ? 'Logging in...' : 'Login'}
-                    </button>
+                )}
+
+                <h1 className="text-2xl font-semibold text-green-700 text-center mb-4">
+                    Sub Admin Login
+                </h1>
+
+                {/* Display the Election Code input field */}
+                <form className="space-y-4">
+                    <div className="relative">
+                        <InputLabel htmlFor="election_code" value="Election Code" />
+                        <div className="flex items-center border border-green-300 rounded-md shadow-sm p-2 transition-colors focus-within:border-green-500">
+                            <FaUser className="text-green-500 mr-2" />
+                            <TextInput
+                                id="election_code"
+                                type="text"
+                                name="election_code"
+                                className="w-full outline-none"
+                                autoComplete="off"
+                                isFocused={true}
+                                readOnly
+                            />
+                        </div>
+                        <InputError message="" className="mt-2" />
+                    </div>
+
+                    {/* Button that redirects directly to the dashboard */}
+                    <div className="flex items-center justify-between">
+                        <PrimaryButton
+                            className="bg-green-600 hover:bg-green-500 text-white rounded-md shadow-md focus:ring-4 focus:ring-green-300 transition-all"
+                            onClick={handleRedirect} // Prevent form submission and redirect
+                        >
+                            Go to Dashboard
+                        </PrimaryButton>
+                    </div>
                 </form>
             </div>
-        </div>
+        </GuestLayout>
     );
 }
-
-const styles = {
-    body: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        background: 'linear-gradient(135deg, #2e8b57 0%, #32cd32 100%)',
-        fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
-    },
-    container: {
-        textAlign: 'center',
-        backgroundColor: '#fff',
-        padding: '30px',
-        borderRadius: '20px',
-        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.1)',
-        width: '100%',
-        maxWidth: '400px',
-    },
-    title: {
-        fontSize: '24px',
-        color: '#2d3436',
-        marginBottom: '20px',
-        fontWeight: '700',
-    },
-    inputGroup: {
-        marginBottom: '20px',
-    },
-    input: {
-        padding: '12px',
-        width: '100%',
-        fontSize: '16px',
-        border: '2px solid #ddd',
-        borderRadius: '10px',
-        background: '#f9f9f9',
-        outline: 'none',
-    },
-    btn: {
-        backgroundColor: '#2e8b57',
-        color: '#fff',
-        padding: '12px 24px',
-        fontSize: '16px',
-        border: 'none',
-        borderRadius: '30px',
-        cursor: 'pointer',
-        transition: 'background-color 0.3s ease, transform 0.3s ease',
-    },
-    error: {
-        color: 'red',
-        fontSize: '14px',
-        marginBottom: '10px',
-    },
-};

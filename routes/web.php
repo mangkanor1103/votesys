@@ -11,18 +11,29 @@ use Inertia\Inertia;
 use App\Http\Controllers\SubAdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
-Route::get('/sub-admin/login', [AuthenticatedSessionController::class, 'create'])->name('sub-admin.login');
-Route::post('/sub-admin/login', [AuthenticatedSessionController::class, 'store'])->name('sub-admin.login.store');
 
-// Protected routes for sub-admin after login
-Route::middleware('auth:sub-admin')->get('/sub-admin/dashboard', [SubAdminController::class, 'dashboard'])->name('sub-admin.dashboard');
+// routes/web.php
 
-// Logout sub-admin
-Route::post('/sub-admin/logout', [AuthenticatedSessionController::class, 'destroy'])->name('sub-admin.logout');
+Route::get('/subdashboard', function () {
+    return Inertia::render('SubAdmin/SubDashboard');
+})->name('subdashboard');
+
+Route::get('/manage-positions', function () {
+    return Inertia::render('SubAdmin/ManagePositions');
+})->name('manage-positions');
+
+Route::get('/manage-voters', function () {
+    return Inertia::render('SubAdmin/ManageVoters');
+})->name('manage-voters');
+
+Route::get('/manage-candidates', function () {
+    return Inertia::render('SubAdmin/ManageCandidates');
+})->name('manage-candidates');
 
 Route::get('/sub-admin/login', function () {
-    return Inertia::render('SubAdmin/Login');
-});
+    return Inertia::render('SubAdmin/Login');  // Make sure the path matches your JSX file
+})->name('subAdmin.login');
+
 
 
 Route::get('data', [Profile::class,
@@ -41,10 +52,6 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
-Route::get('/sub-admin/login', function () {
-    return Inertia::render('SubAdmin/Login');  // Make sure the path matches your JSX file
-})->name('subAdmin.login');
 
 // Define routes for authenticated users
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -69,24 +76,6 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-// Example simple routes for testing or other purposes
-Route::get('/welcome', function(){
-    return view('app');
-});
-
-Route::get('/Welcome', function(){
-    return 'Hello World, I am Rhea!';
-});
-
-Route::get('/header', function(){
-    return response('<h1></h1>');
-});
-
-Route::get('/header', function(){
-    return response('<h1></h1>')
-        ->header('Content-Type','text/plain')
-        ->header('foo','bar');
-});
 
 
 
