@@ -1,9 +1,10 @@
 import React from "react";
-import { FaVoteYea } from 'react-icons/fa'; // Use an icon for elections
+import { FaVoteYea, FaTrash } from 'react-icons/fa'; // Import trash icon for delete
 import InputError from "@/Components/InputError";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { Head, useForm } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+import { Inertia } from '@inertiajs/inertia';
 
 export default function Elections({ auth, elections }) {
     const { data, setData, post, processing, reset, errors } = useForm({
@@ -17,6 +18,18 @@ export default function Elections({ auth, elections }) {
             onSuccess: () => reset(),
         });
     };
+
+// Handle Delete Election
+const handleDelete = (id) => {
+    if (confirm("Are you sure you want to delete this election?")) {
+        // Use Inertia.delete instead of post for DELETE requests
+        Inertia.delete(route('election.delete', id), {
+            onSuccess: () => {
+                // Optional: Handle the success, like refreshing the list or showing a success message
+            }
+        });
+    }
+};
 
     return (
         <AuthenticatedLayout>
@@ -64,6 +77,7 @@ export default function Elections({ auth, elections }) {
                                 <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase tracking-wide">Election Name</th>
                                 <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase tracking-wide">Election Date</th>
                                 <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase tracking-wide">Election Code</th>
+                                <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase tracking-wide">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-green-100">
@@ -72,6 +86,14 @@ export default function Elections({ auth, elections }) {
                                     <td className="px-6 py-4 text-sm text-green-900">{election.election_name}</td>
                                     <td className="px-6 py-4 text-sm text-green-900">{election.election_date}</td>
                                     <td className="px-6 py-4 text-sm text-green-900">{election.election_code}</td>
+                                    <td className="px-6 py-4 text-sm text-green-900">
+                                        <button
+                                            onClick={() => handleDelete(election.id)}
+                                            className="text-red-600 hover:text-red-800"
+                                        >
+                                            <FaTrash className="inline mr-2" /> Delete
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>

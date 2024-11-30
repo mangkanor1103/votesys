@@ -1,12 +1,23 @@
 <?php
 
 use App\Http\Controllers\ElectionController;
+use App\http\Controllers\PostController;
 use App\Http\Controllers\Profile;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ShareController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\SubAdminController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+
+
+// routes/web.php
+Route::post('/validate-election-code', [ElectionController::class, 'validateElectionCode'])->name('validate.election.code');
+Route::delete('/elections/{id}', [ElectionController::class, 'destroy'])->name('election.delete');
+// Define the route for elections.index
+Route::get('/elections', [ElectionController::class, 'index'])->name('elections.index');
+
 
 Route::get('/subdashboard', function () {
     return Inertia::render('SubAdmin/SubDashboard');

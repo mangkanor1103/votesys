@@ -135,4 +135,17 @@ public function showDashboard($id)
         return response()->json(['success' => false, 'message' => 'Invalid election code.'], 400);
     }
 
+    public function destroy($id)
+{
+    $election = Election::find($id);
+
+    if (!$election) {
+        return redirect()->route('elections.index')->with('error', 'Election not found');
+    }
+
+    $election->delete();
+
+    return redirect()->route('elections.index')->with('success', 'Election deleted successfully');
+}
+
 }
