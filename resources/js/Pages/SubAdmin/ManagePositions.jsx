@@ -1,68 +1,54 @@
-import { Head, useForm } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
-import { Link } from '@inertiajs/react'; // Inertia Link component
-import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa'; // Icons
-import axios from 'axios'; // Import axios for making API requests
+import { Head } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa';
+import axios from 'axios';
 
-export default function ManagePositions() {
-    const [positions, setPositions] = useState([]);
-    const [showModal, setShowModal] = useState(false);
+export default function ManagePositions({ positions, electionId, flash }) {
     const [positionName, setPositionName] = useState('');
     const [maxVotes, setMaxVotes] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
-    const electionId = localStorage.getItem('election_id'); // Get election_id from localStorage
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(flash?.success || null);
+    const [storedElectionId, setStoredElectionId] = useState(null);
 
-    // Fetch positions from the server when the component is mounted
     useEffect(() => {
-        const fetchPositions = async () => {
-            try {
-                const response = await axios.get(`/api/positions/${electionId}`);
-                setPositions(response.data.positions);
-            } catch (error) {
-                console.error('Error fetching positions:', error);
-            }
-        };
+        const storedElectionId = localStorage.getItem('election_id');
+        setStoredElectionId(storedElectionId);
+    }, []);
 
-        fetchPositions();
-    }, [electionId]);
+    const safePositions = positions || [];
 
-    const { post } = useForm();
+    const handleCreatePosition = async (e) => {
+        e.preventDefault();
 
-    const handleLogout = () => {
-        post(route('logout')); // Send POST request to the logout route
-    };
+        if (!electionId && !storedElectionId) {
+            setError('Election ID is missing');
+            return;
+        }
 
-    const handleAddPosition = async () => {
+        const finalElectionId = electionId || storedElectionId;
+
         try {
-            const response = await axios.post(`/api/positions`, {
-                election_id: electionId,
-                position_name: positionName,
+            const response = await axios.post(`/positions/${finalElectionId}`, {
+                name: positionName,
                 max_votes: maxVotes,
             });
 
-            if (response.data.success) {
-                setPositions([...positions, response.data.position]);
-                setPositionName('');
-                setMaxVotes('');
-                setShowModal(false); // Close the modal after submission
-            } else {
-                setErrorMessage(response.data.message);
-            }
+            console.log('Position created:', response.data);
+
+            setPositionName('');
+            setMaxVotes('');
+            window.location.reload();
         } catch (error) {
-            setErrorMessage('An error occurred while adding the position.');
+            console.error('Error creating position:', error);
+            setError('An error occurred while creating the position');
         }
     };
 
-    const handleDeletePosition = async (positionId) => {
-        try {
-            const response = await axios.delete(`/api/positions/${positionId}`);
-
-            if (response.data.success) {
-                setPositions(positions.filter((position) => position.id !== positionId));
-            }
-        } catch (error) {
-            setErrorMessage('An error occurred while deleting the position.');
-        }
+    const handleLogout = () => {
+        axios.post('/logout').then(() => {
+            window.location.href = '/login';
+        });
     };
 
     return (
@@ -104,8 +90,6 @@ export default function ManagePositions() {
                             >
                                 <FaChalkboardTeacher className="text-xl" /> Manage Candidates
                             </Link>
-
-                            {/* Logout Button */}
                             <button
                                 onClick={handleLogout}
                                 className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
@@ -125,59 +109,56 @@ export default function ManagePositions() {
                             <h3 className="text-2xl font-medium text-green-600 mb-6">
                                 Manage Positions
                             </h3>
-                            <p className="text-gray-600 text-lg">
-                                This page allows the sub-admin to manage election positions, create new ones, and oversee the voting process for each position.
-                            </p>
 
-                            {/* Add New Position Button */}
-                            <div className="mt-6">
-                                <button
-                                    onClick={() => setShowModal(true)}
-                                    className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 ease-in-out"
-                                >
-                                    Add New Position
-                                </button>
-                            </div>
-
-                            {/* Modal for Adding New Position */}
-                            {showModal && (
-                                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-                                    <div className="bg-white p-6 rounded-lg shadow-xl">
-                                        <h3 className="text-xl font-medium text-green-600 mb-4">Add Position</h3>
-                                        <input
-                                            type="text"
-                                            className="border border-gray-300 rounded-lg p-2 mb-4 w-full"
-                                            placeholder="Position Name"
-                                            value={positionName}
-                                            onChange={(e) => setPositionName(e.target.value)}
-                                        />
-                                        <input
-                                            type="number"
-                                            className="border border-gray-300 rounded-lg p-2 mb-4 w-full"
-                                            placeholder="Max Votes"
-                                            value={maxVotes}
-                                            onChange={(e) => setMaxVotes(e.target.value)}
-                                        />
-                                        {errorMessage && <p className="text-red-600">{errorMessage}</p>}
-                                        <div className="flex justify-end gap-4 mt-4">
-                                            <button
-                                                onClick={() => setShowModal(false)}
-                                                className="bg-gray-300 text-black px-4 py-2 rounded-lg"
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                onClick={handleAddPosition}
-                                                className="bg-green-600 text-white px-6 py-3 rounded-lg"
-                                            >
-                                                Add Position
-                                            </button>
-                                        </div>
-                                    </div>
+                            {success && (
+                                <div className="mt-4 p-4 bg-green-200 text-green-700 rounded-md">
+                                    {success}
+                                </div>
+                            )}
+                            {error && (
+                                <div className="mt-4 p-4 bg-red-200 text-red-700 rounded-md">
+                                    {error}
                                 </div>
                             )}
 
-                            {/* Display list of positions */}
+                            <div className="mt-6">
+                                <form onSubmit={handleCreatePosition}>
+                                    <div className="mb-4">
+                                        <label htmlFor="positionName" className="block text-sm font-medium text-gray-700">
+                                            Position Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="positionName"
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            value={positionName}
+                                            onChange={(e) => setPositionName(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-4">
+                                        <label htmlFor="maxVotes" className="block text-sm font-medium text-gray-700">
+                                            Max Votes
+                                        </label>
+                                        <input
+                                            type="number"
+                                            id="maxVotes"
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            value={maxVotes}
+                                            onChange={(e) => setMaxVotes(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 ease-in-out"
+                                    >
+                                        Add New Position
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* Display positions */}
                             <div className="mt-8">
                                 <table className="min-w-full table-auto">
                                     <thead>
@@ -188,20 +169,13 @@ export default function ManagePositions() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {positions.map((position) => (
+                                        {safePositions.map((position) => (
                                             <tr key={position.id}>
-                                                <td className="px-4 py-2">{position.position_name}</td>
+                                                <td className="px-4 py-2">{position.name}</td>
                                                 <td className="px-4 py-2">{position.max_votes}</td>
                                                 <td className="px-4 py-2">
-                                                    <button className="text-blue-600 hover:text-blue-800 mr-4">
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeletePosition(position.id)}
-                                                        className="text-red-600 hover:text-red-800"
-                                                    >
-                                                        Delete
-                                                    </button>
+                                                    <button className="text-blue-600 hover:text-blue-800">Edit</button>
+                                                    <button className="ml-4 text-red-600 hover:text-red-800">Delete</button>
                                                 </td>
                                             </tr>
                                         ))}

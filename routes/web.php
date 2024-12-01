@@ -11,6 +11,9 @@ use Inertia\Inertia;
 use App\Http\Controllers\SubAdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\PositionController;
+
+Route::post('/positions/{electionId}', [PositionController::class, 'store'])->name('store-position');
 
 Route::post('/logout', function () {
     Auth::logout(); // Log the user out
