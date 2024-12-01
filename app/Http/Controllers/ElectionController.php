@@ -6,6 +6,7 @@ use App\Models\Election;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
+use App\Models\Candidate;
 
 class ElectionController extends Controller
 {
@@ -155,6 +156,23 @@ public function showDashboard($id)
     $election->delete();
 
     return redirect()->route('elections.index')->with('success', 'Election deleted successfully');
+
+
 }
+
+public function showElectionPage()
+    {
+        // Fetch candidates from the database (replace with your logic)
+        $candidates = Candidate::all();
+        
+        // Define the election name (replace with actual election logic)
+        $electionName = "Sample Election";
+
+        // Render the Inertia page with candidates and election name
+        return Inertia::render('User/Users', [
+            'candidates' => $candidates,
+            'electionName' => $electionName,
+        ]);
+    }
 
 }

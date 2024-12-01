@@ -15,10 +15,23 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 
+
+Route::get('/election', [ElectionController::class, 'showElectionPage']);
+
 Route::get('/api/candidates', [CandidateController::class, 'index']);
 Route::post('/api/candidates', [CandidateController::class, 'store']);
 Route::delete('/api/candidates/{id}', [CandidateController::class, 'destroy']);
 Route::post('/voters/generate', [VoterController::class, 'generateVoterCodes']);
+
+Route::get('/users', function () {
+    return Inertia::render('User/Users');
+})->name('users.index');
+
+
+Route::get('/users', function () {
+    return Inertia::render('User/Users');
+});
+
 
 
 Route::post('/positions/{electionId}', [PositionController::class, 'store'])->name('store-position');
