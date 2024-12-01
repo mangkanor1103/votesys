@@ -1,9 +1,51 @@
 import { Head } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { FaChalkboardTeacher, FaHome, FaRegFlag, FaUsers, FaSignOutAlt } from 'react-icons/fa'; // Import necessary icons
 import { Link } from '@inertiajs/react'; // Add the Link import
 
 export default function ManageCandidates() {
+    const [candidates, setCandidates] = useState([]);
+    const [candidateName, setCandidateName] = useState('');
+    const [candidatePosition, setCandidatePosition] = useState('');
+
+    // Function to fetch candidates from the backend
+    const fetchCandidates = async () => {
+        const response = await axios.get('/api/candidates'); // Adjust URL as needed for your backend
+        setCandidates(response.data);
+    };
+
+    // Function to handle candidate submission
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const response = await axios.post('/api/candidates', {
+            name: candidateName,
+            position: candidatePosition
+        });
+        if (response.data.success) {
+            // Update state with the new candidate
+            setCandidates([...candidates, response.data.candidate]);
+            setCandidateName('');
+            setCandidatePosition('');
+        } else {
+            console.error('Error adding candidate');
+        }
+    };
+
+    // Function to delete a candidate
+    const handleDelete = async (id) => {
+        const response = await axios.delete(`/api/candidates/${id}`);
+        if (response.data.success) {
+            setCandidates(candidates.filter(candidate => candidate.id !== id));
+        } else {
+            console.error('Error deleting candidate');
+        }
+    };
+
+    // Fetch candidates on component mount
+    React.useEffect(() => {
+        fetchCandidates();
+    }, []);
+
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
             <Head title="Manage Candidates" />
@@ -62,6 +104,57 @@ export default function ManageCandidates() {
                             <p className="text-gray-600 text-lg">
                                 This page allows the sub-admin to manage candidates for the election, including adding, editing, and removing candidates.
                             </p>
+
+                            {/* Candidate Form */}
+                            <form onSubmit={handleSubmit} className="mb-6">
+                                <div className="mb-4">
+                                    <label htmlFor="candidateName" className="block text-gray-700">Candidate Name</label>
+                                    <input
+                                        type="text"
+                                        id="candidateName"
+                                        value={candidateName}
+                                        onChange={(e) => setCandidateName(e.target.value)}
+                                        className="w-full p-3 mt-2 border rounded-md"
+                                        placeholder="Enter candidate name"
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label htmlFor="candidatePosition" className="block text-gray-700">Candidate Position</label>
+                                    <input
+                                        type="text"
+                                        id="candidatePosition"
+                                        value={candidatePosition}
+                                        onChange={(e) => setCandidatePosition(e.target.value)}
+                                        className="w-full p-3 mt-2 border rounded-md"
+                                        placeholder="Enter position"
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700">
+                                    Add Candidate
+                                </button>
+                            </form>
+
+                            {/* Candidate List */}
+                            <div>
+                                <h4 className="text-xl font-semibold text-gray-700">Candidate List</h4>
+                                <ul className="mt-4">
+                                    {candidates.map((candidate) => (
+                                        <li key={candidate.id} className="flex justify-between items-center mb-4">
+                                            <div className="text-gray-800">
+                                                <strong>{candidate.name}</strong> - {candidate.position}
+                                            </div>
+                                            <button
+                                                onClick={() => handleDelete(candidate.id)}
+                                                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                                            >
+                                                Delete
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                         </div>
                     </div>
                 </div>

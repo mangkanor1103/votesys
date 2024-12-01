@@ -13,6 +13,12 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\VoterController;
+use App\Http\Controllers\CandidateController;
+
+Route::get('/api/candidates', [CandidateController::class, 'index']);
+Route::post('/api/candidates', [CandidateController::class, 'store']);
+Route::delete('/api/candidates/{id}', [CandidateController::class, 'destroy']);
+
 
 Route::post('/positions/{electionId}', [PositionController::class, 'store'])->name('store-position');
 
