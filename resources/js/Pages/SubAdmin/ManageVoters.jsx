@@ -1,29 +1,49 @@
 import { Head } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { FaUsers, FaHome, FaRegFlag, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa';
-import { Link, useForm } from '@inertiajs/react';
+import { Link } from '@inertiajs/react';
+import axios from 'axios'; // Make sure axios is imported
 
-export default function ManageVoters({ electionId }) {
+export default function ManageVoters() {
     const [numCodes, setNumCodes] = useState('');
-    const { post, errors, processing } = useForm({ numCodes: '' });
-
+    const [electionId, setElectionId] = useState(''); // State for election_id
+    const [errors, setErrors] = useState([]);
+    const [processing, setProcessing] = useState(false);
 
     const handleGenerateCodes = async (event) => {
         event.preventDefault();
 
-        try {
-          const response = await axios.post('/voters/generate', {
-            election_id: electionId, // Ensure this matches the backend key
-            number_of_codes: numberOfCodes,
-          });
-          alert('Voter codes generated successfully!');
-          console.log(response.data);
-        } catch (error) {
-          console.error('Error generating voter codes:', error);
-          alert('Failed to generate voter codes. Please try again.');
+        // Validation
+        if (!electionId) {
+            setErrors(['Please enter a valid election ID.']);
+            return;
         }
-      };
 
+        if (!numCodes || numCodes <= 0) {
+            setErrors(['Please enter a valid number of codes.']);
+            return;
+        }
+
+        setProcessing(true);
+        try {
+            const response = await axios.post('/voters/generate', {
+                election_id: electionId, // Passing election_id
+                number_of_codes: numCodes,
+            });
+
+            alert('Voter codes generated successfully!');
+            setNumCodes('');
+            setElectionId(''); // Clear election_id after submission
+            setErrors([]);
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error generating voter codes:', error);
+            alert('Failed to generate voter codes. Please try again.');
+            setErrors([error.response?.data?.message || 'An error occurred']);
+        } finally {
+            setProcessing(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
@@ -64,6 +84,19 @@ export default function ManageVoters({ electionId }) {
                             <h3 className="text-2xl font-medium text-green-600 mb-6">Generate Voter Codes</h3>
                             <form onSubmit={handleGenerateCodes}>
                                 <div className="mb-4">
+                                    <label htmlFor="electionId" className="block text-lg text-gray-600">
+                                        Election ID:
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="electionId"
+                                        value={electionId}
+                                        onChange={(e) => setElectionId(e.target.value)}
+                                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-green-300"
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-4">
                                     <label htmlFor="numCodes" className="block text-lg text-gray-600">
                                         Number of Voter Codes to Generate:
                                     </label>
@@ -75,14 +108,14 @@ export default function ManageVoters({ electionId }) {
                                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-green-300"
                                         required
                                     />
-                                    {errors.numCodes && <span className="text-red-500">{errors.numCodes}</span>}
+                                    {errors.length > 0 && <div className="text-red-500 mt-2">{errors.join(', ')}</div>}
                                 </div>
                                 <button
                                     type="submit"
                                     className="px-6 py-3 bg-green-700 text-white rounded-lg hover:bg-green-800"
                                     disabled={processing}
                                 >
-                                    Generate Codes
+                                    {processing ? 'Generating...' : 'Generate Codes'}
                                 </button>
                             </form>
                         </div>

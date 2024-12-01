@@ -2,51 +2,41 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\VoterCode;
-use Illuminate\Support\Str;
+use App\Models\Voter;
+use App\Models\Election;
 
 class VoterController extends Controller
 {
-    public function generate(Request $request)
-{
-    $request->validate([
-        'election_id' => 'required|exists:elections,id',
-        'number_of_codes' => 'required|integer|min:1',
-    ]);
-
-    $electionId = $request->input('election_id'); // Match frontend key
-    $numberOfCodes = $request->input('number_of_codes');
-
-    for ($i = 0; $i < $numberOfCodes; $i++) {
-        VoterCode::create([
-            'election_id' => $electionId,
-            'voter_code' => Str::random(10),
-        ]);
-    }
-
-    return response()->json(['message' => 'Voter codes generated successfully.']);
-}
-
-    public function generateVoterCodes(Request $request, $electionId)
+    public function generateVoterCodes(Request $request)
     {
-        $request->validate([
-            'numCodes' => 'required|integer|min:1',
+        $validated = $request->validate([
+            'election_id' => 'required|exists:elections,id',
+            'number_of_codes' => 'required|integer|min:1',
         ]);
 
-        $numCodes = $request->input('numCodes');
-        $voterCodes = [];
+        $election = Election::find($validated['election_id']);
+        $numberOfCodes = $validated['number_of_codes'];
 
-        for ($i = 0; $i < $numCodes; $i++) {
-            $voterCodes[] = [
-                'election_id' => $electionId,
-                'code' => strtoupper(uniqid()),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+        // Generate the voter codes
+        $voterCodes = [];
+        for ($i = 0; $i < $numberOfCodes; $i++) {
+            $voterCodes[] = $this->generateUniqueVoterCode();
         }
 
-        VoterCode::insert($voterCodes);
+        // Store the codes in the database
+        foreach ($voterCodes as $code) {
+            Voter::create([
+                'election_id' => $election->id,
+                'code' => $code,
+            ]);
+        }
 
-        return back()->with('success', "$numCodes voter codes generated successfully.");
+        return response()->json(['message' => 'Voter codes generated successfully!'], 200);
+    }
+
+    private function generateUniqueVoterCode()
+    {
+        // Generate a random, unique voter code
+        return strtoupper(bin2hex(random_bytes(4))); // Generates an 8-character code
     }
 }
