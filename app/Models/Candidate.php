@@ -8,5 +8,15 @@ class Candidate extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'position'];
+    protected $fillable = ['position_id', 'election_id', 'name', 'description', 'photo'];
+
+    public function position()
+    {
+        return $this->belongsTo(Position::class);
+    }
+
+    public function election()
+    {
+        return $this->belongsTo(Election::class);
+    }
 }

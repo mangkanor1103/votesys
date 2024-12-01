@@ -13,4 +13,8 @@ class Election extends Model
         'election_date',
         'election_code',  // Add the election_code to the fillable array
     ];
+    public function positions()
+    {
+        return $this->hasMany(Position::class);
+    }
 }

@@ -25,6 +25,14 @@ class ElectionController extends Controller
             'elections' => $elections,
         ]);
     }
+    public function getPositions($electionId)
+{
+    $election = Election::with('positions')->findOrFail($electionId);
+
+    return response()->json([
+        'positions' => $election->positions,
+    ]);
+}
 // Assuming you have a LoginController or a method in ElectionController to handle login
 // ElectionController.php
 
@@ -164,7 +172,7 @@ public function showElectionPage()
     {
         // Fetch candidates from the database (replace with your logic)
         $candidates = Candidate::all();
-        
+
         // Define the election name (replace with actual election logic)
         $electionName = "Sample Election";
 

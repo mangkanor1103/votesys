@@ -15,6 +15,16 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 
+Route::get('/elections/{electionId}/positions', [CandidateController::class, 'getPositions']);
+Route::get('/elections/{electionId}/manage-candidates', [CandidateController::class, 'index']);
+// In routes/web.php or routes/api.php
+Route::post('/candidates/{electionId}', [CandidateController::class, 'store']);
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/candidates/{electionId}', [CandidateController::class, 'index'])->name('manage-candidates');
+    Route::post('/candidates/{electionId}', [CandidateController::class, 'store']);
+});
 
 Route::get('/election', [ElectionController::class, 'showElectionPage']);
 
