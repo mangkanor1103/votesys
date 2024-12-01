@@ -1,19 +1,72 @@
 import { Head, useForm } from '@inertiajs/react';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from '@inertiajs/react'; // Inertia Link component
 import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa'; // Icons
+import axios from 'axios'; // Import axios for making API requests
 
 export default function ManagePositions() {
-    // Use Inertia's useForm hook for handling the logout action
+    const [positions, setPositions] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [positionName, setPositionName] = useState('');
+    const [maxVotes, setMaxVotes] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
+    const electionId = localStorage.getItem('election_id'); // Get election_id from localStorage
+
+    // Fetch positions from the server when the component is mounted
+    useEffect(() => {
+        const fetchPositions = async () => {
+            try {
+                const response = await axios.get(`/api/positions/${electionId}`);
+                setPositions(response.data.positions);
+            } catch (error) {
+                console.error('Error fetching positions:', error);
+            }
+        };
+
+        fetchPositions();
+    }, [electionId]);
+
     const { post } = useForm();
 
-    // Function to handle logout
     const handleLogout = () => {
         post(route('logout')); // Send POST request to the logout route
     };
 
+    const handleAddPosition = async () => {
+        try {
+            const response = await axios.post(`/api/positions`, {
+                election_id: electionId,
+                position_name: positionName,
+                max_votes: maxVotes,
+            });
+
+            if (response.data.success) {
+                setPositions([...positions, response.data.position]);
+                setPositionName('');
+                setMaxVotes('');
+                setShowModal(false); // Close the modal after submission
+            } else {
+                setErrorMessage(response.data.message);
+            }
+        } catch (error) {
+            setErrorMessage('An error occurred while adding the position.');
+        }
+    };
+
+    const handleDeletePosition = async (positionId) => {
+        try {
+            const response = await axios.delete(`/api/positions/${positionId}`);
+
+            if (response.data.success) {
+                setPositions(positions.filter((position) => position.id !== positionId));
+            }
+        } catch (error) {
+            setErrorMessage('An error occurred while deleting the position.');
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-gradient-to-r from-green-500 to-teal-500">
+        <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
             <Head title="Manage Positions" />
 
             {/* Navbar */}
@@ -76,14 +129,55 @@ export default function ManagePositions() {
                                 This page allows the sub-admin to manage election positions, create new ones, and oversee the voting process for each position.
                             </p>
 
-                            {/* Add your content here for managing positions */}
+                            {/* Add New Position Button */}
                             <div className="mt-6">
-                                <button className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 ease-in-out">
+                                <button
+                                    onClick={() => setShowModal(true)}
+                                    className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 ease-in-out"
+                                >
                                     Add New Position
                                 </button>
                             </div>
 
-                            {/* Display list of positions or other related elements */}
+                            {/* Modal for Adding New Position */}
+                            {showModal && (
+                                <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+                                    <div className="bg-white p-6 rounded-lg shadow-xl">
+                                        <h3 className="text-xl font-medium text-green-600 mb-4">Add Position</h3>
+                                        <input
+                                            type="text"
+                                            className="border border-gray-300 rounded-lg p-2 mb-4 w-full"
+                                            placeholder="Position Name"
+                                            value={positionName}
+                                            onChange={(e) => setPositionName(e.target.value)}
+                                        />
+                                        <input
+                                            type="number"
+                                            className="border border-gray-300 rounded-lg p-2 mb-4 w-full"
+                                            placeholder="Max Votes"
+                                            value={maxVotes}
+                                            onChange={(e) => setMaxVotes(e.target.value)}
+                                        />
+                                        {errorMessage && <p className="text-red-600">{errorMessage}</p>}
+                                        <div className="flex justify-end gap-4 mt-4">
+                                            <button
+                                                onClick={() => setShowModal(false)}
+                                                className="bg-gray-300 text-black px-4 py-2 rounded-lg"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={handleAddPosition}
+                                                className="bg-green-600 text-white px-6 py-3 rounded-lg"
+                                            >
+                                                Add Position
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Display list of positions */}
                             <div className="mt-8">
                                 <table className="min-w-full table-auto">
                                     <thead>
@@ -94,16 +188,23 @@ export default function ManagePositions() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {/* Loop through positions data here */}
-                                        <tr>
-                                            <td className="px-4 py-2">President</td>
-                                            <td className="px-4 py-2">1</td>
-                                            <td className="px-4 py-2">
-                                                <button className="text-blue-600 hover:text-blue-800">Edit</button>
-                                                <button className="ml-4 text-red-600 hover:text-red-800">Delete</button>
-                                            </td>
-                                        </tr>
-                                        {/* Add more rows as needed */}
+                                        {positions.map((position) => (
+                                            <tr key={position.id}>
+                                                <td className="px-4 py-2">{position.position_name}</td>
+                                                <td className="px-4 py-2">{position.max_votes}</td>
+                                                <td className="px-4 py-2">
+                                                    <button className="text-blue-600 hover:text-blue-800 mr-4">
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeletePosition(position.id)}
+                                                        className="text-red-600 hover:text-red-800"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
                                     </tbody>
                                 </table>
                             </div>

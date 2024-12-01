@@ -11,7 +11,6 @@ import { Head } from '@inertiajs/react';
 export default function Login({ status }) {
     const [electionCode, setElectionCode] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-
     const handleRedirect = async (e) => {
         e.preventDefault();
 
@@ -21,7 +20,17 @@ export default function Login({ status }) {
             });
 
             if (response.data.success) {
-                window.location.href = '/subdashboard';
+                // Retrieve election data from the response
+                const { id, code, name, date } = response.data.election;
+
+                // Store election ID, code, name, and date in localStorage
+                localStorage.setItem('election_id', id);
+                localStorage.setItem('election_code', code);
+                localStorage.setItem('election_name', name);
+                localStorage.setItem('election_date', date);
+
+                // Redirect to the dashboard with the correct parameters
+                window.location.href = `/subdashboard?election_id=${id}&election_code=${code}&election_name=${name}&election_date=${date}`;
             }
         } catch (error) {
             setErrorMessage(

@@ -1,16 +1,33 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import React from 'react';
-import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa'; // Icons
+import React, { useEffect, useState } from 'react';
+import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa';
 
 export default function Welcome() {
     const { post } = useForm();
+    const [electionCode, setElectionCode] = useState('');
+    const [electionId, setElectionId] = useState('');
+    const [electionName, setElectionName] = useState('');
+    const [electionDate, setElectionDate] = useState('');
+
+    useEffect(() => {
+        // Fetch election details from localStorage
+        const storedElectionCode = localStorage.getItem('election_code');
+        const storedElectionId = localStorage.getItem('election_id');
+        const storedElectionName = localStorage.getItem('election_name');
+        const storedElectionDate = localStorage.getItem('election_date');
+
+        setElectionCode(storedElectionCode || 'N/A');
+        setElectionId(storedElectionId || 'N/A');
+        setElectionName(storedElectionName || 'N/A');
+        setElectionDate(storedElectionDate || 'N/A');
+    }, []);
 
     const handleLogout = () => {
         post(route('logout'));
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-r from-green-500 to-teal-500">
+        <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
             <Head title="Welcome" />
 
             {/* Navbar */}
@@ -49,7 +66,7 @@ export default function Welcome() {
                                 <FaChalkboardTeacher className="text-xl" /> Manage Candidates
                             </Link>
                             <button
-                                onClick={handleLogout} // Call logout on button click
+                                onClick={handleLogout}
                                 className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
                             >
                                 <FaSignOutAlt className="text-xl" /> Logout
@@ -70,6 +87,20 @@ export default function Welcome() {
                             <p className="text-gray-600 text-lg">
                                 Please proceed to manage elections, voters, and candidates efficiently.
                             </p>
+                            <div className="mt-6">
+                                <p className="text-green-700 text-lg font-semibold">
+                                    Election Code: <span className="text-gray-800">{electionCode}</span>
+                                </p>
+                                <p className="text-green-700 text-lg font-semibold">
+                                    Election ID: <span className="text-gray-800">{electionId}</span>
+                                </p>
+                                <p className="text-green-700 text-lg font-semibold">
+                                    Election Name: <span className="text-gray-800">{electionName}</span>
+                                </p>
+                                <p className="text-green-700 text-lg font-semibold">
+                                    Election Date: <span className="text-gray-800">{electionDate}</span>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

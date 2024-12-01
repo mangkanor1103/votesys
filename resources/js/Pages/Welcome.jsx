@@ -15,7 +15,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-r from-green-500 to-teal-500">
+        <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
             <Head title="Welcome" />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

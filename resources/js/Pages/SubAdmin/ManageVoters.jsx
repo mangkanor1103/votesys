@@ -5,7 +5,7 @@ import { Link } from '@inertiajs/react'; // Add the Link import
 
 export default function ManageVoters() {
     return (
-        <div className="min-h-screen bg-gradient-to-r from-green-500 to-teal-500">
+        <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
             <Head title="Manage Voters" />
 
             {/* Navbar */}
