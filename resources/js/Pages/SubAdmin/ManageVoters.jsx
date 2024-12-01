@@ -1,14 +1,23 @@
 import { Head } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUsers, FaHome, FaRegFlag, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa';
 import { Link } from '@inertiajs/react';
-import axios from 'axios'; // Make sure axios is imported
+import axios from 'axios';
 
 export default function ManageVoters() {
     const [numCodes, setNumCodes] = useState('');
-    const [electionId, setElectionId] = useState(''); // State for election_id
+    const [electionId, setElectionId] = useState(''); // State for election ID
     const [errors, setErrors] = useState([]);
     const [processing, setProcessing] = useState(false);
+    const [generatedCodes, setGeneratedCodes] = useState([]);
+
+    // Automatically populate election ID from localStorage
+    useEffect(() => {
+        const storedElectionId = localStorage.getItem('election_id');
+        if (storedElectionId) {
+            setElectionId(storedElectionId);
+        }
+    }, []);
 
     const handleGenerateCodes = async (event) => {
         event.preventDefault();
@@ -27,15 +36,14 @@ export default function ManageVoters() {
         setProcessing(true);
         try {
             const response = await axios.post('/voters/generate', {
-                election_id: electionId, // Passing election_id
+                election_id: electionId,
                 number_of_codes: numCodes,
             });
 
             alert('Voter codes generated successfully!');
+            setGeneratedCodes(response.data.codes); // Update state with generated codes
             setNumCodes('');
-            setElectionId(''); // Clear election_id after submission
             setErrors([]);
-            console.log(response.data);
         } catch (error) {
             console.error('Error generating voter codes:', error);
             alert('Failed to generate voter codes. Please try again.');
@@ -94,6 +102,7 @@ export default function ManageVoters() {
                                         onChange={(e) => setElectionId(e.target.value)}
                                         className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-green-300"
                                         required
+                                        readOnly // Election ID is read-only
                                     />
                                 </div>
                                 <div className="mb-4">
@@ -118,6 +127,18 @@ export default function ManageVoters() {
                                     {processing ? 'Generating...' : 'Generate Codes'}
                                 </button>
                             </form>
+
+                            {/* Display Generated Codes */}
+                            {generatedCodes.length > 0 && (
+                                <div className="mt-6">
+                                    <h4 className="text-lg font-semibold text-green-600">Generated Voter Codes:</h4>
+                                    <ul className="mt-2 list-disc pl-6">
+                                        {generatedCodes.map((code, index) => (
+                                            <li key={index} className="text-gray-700">{code}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
