@@ -12,8 +12,12 @@ use App\Http\Controllers\SubAdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\VoterController;
 
 Route::post('/positions/{electionId}', [PositionController::class, 'store'])->name('store-position');
+
+Route::post('/elections/{electionId}/generate-voter-codes', [VoterController::class, 'generateVoterCodes'])->name('generate-voter-codes');
+Route::post('/voters/generate', [VoterController::class, 'generate'])->name('generate-voter-codes');
 
 Route::post('/logout', function () {
     Auth::logout(); // Log the user out
