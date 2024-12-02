@@ -16,8 +16,8 @@ class PositionController extends Controller
      */
     public function index($electionId)
     {
-        // Fetch the positions for the given election
-        $positions = Position::where('election_id', $electionId)->get();
+        // Fetch the positions for the given election with candidates
+        $positions = Position::with('candidates')->where('election_id', $electionId)->get();
 
         return response()->json($positions);
     }
@@ -43,23 +43,27 @@ class PositionController extends Controller
         }
 
         // Create or update the position
-        if ($positionId) {
-            // Update existing position
-            $position = Position::findOrFail($positionId);
-            $position->update([
-                'name' => $request->input('name'),
-                'max_votes' => $request->input('max_votes'),
-            ]);
-        } else {
-            // Create a new position
-            $position = Position::create([
-                'election_id' => $electionId,
-                'name' => $request->input('name'),
-                'max_votes' => $request->input('max_votes'),
-            ]);
-        }
+        try {
+            if ($positionId) {
+                // Update existing position
+                $position = Position::findOrFail($positionId);
+                $position->update([
+                    'name' => $request->input('name'),
+                    'max_votes' => $request->input('max_votes'),
+                ]);
+            } else {
+                // Create a new position
+                $position = Position::create([
+                    'election_id' => $electionId,
+                    'name' => $request->input('name'),
+                    'max_votes' => $request->input('max_votes'),
+                ]);
+            }
 
-        return response()->json($position);
+            return response()->json(['message' => 'Position created/updated successfully.', 'position' => $position], 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'An error occurred while processing the request.'], 500);
+        }
     }
 
     /**
@@ -71,10 +75,14 @@ class PositionController extends Controller
      */
     public function destroy($electionId, $positionId)
     {
-        // Find the position and delete it
-        $position = Position::where('election_id', $electionId)->findOrFail($positionId);
-        $position->delete();
+        try {
+            // Find and delete the position
+            $position = Position::where('election_id', $electionId)->findOrFail($positionId);
+            $position->delete();
 
-        return response()->json(['message' => 'Position deleted successfully.']);
+            return response()->json(['message' => 'Position deleted successfully.'], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['error' => 'Position not found.'], 404);
+        }
     }
 }
