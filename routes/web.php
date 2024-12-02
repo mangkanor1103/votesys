@@ -15,6 +15,18 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 
+
+// Fetch positions for a specific election
+Route::get('/positions/{electionId}', [PositionController::class, 'index'])->name('positions.index');
+
+// Create a new position or update an existing one
+Route::post('/positions/{electionId}', [PositionController::class, 'storeOrUpdate'])->name('positions.store');
+Route::put('/positions/{electionId}/{positionId}', [PositionController::class, 'storeOrUpdate'])->name('positions.update');
+
+// Delete a position
+Route::delete('/positions/{electionId}/{positionId}', [PositionController::class, 'destroy'])->name('positions.destroy');
+
+
 Route::get('/elections/{electionId}/positions', [CandidateController::class, 'getPositions']);
 Route::get('/elections/{electionId}/manage-candidates', [CandidateController::class, 'index']);
 // In routes/web.php or routes/api.php
@@ -43,8 +55,6 @@ Route::get('/users', function () {
 });
 
 
-
-Route::post('/positions/{electionId}', [PositionController::class, 'store'])->name('store-position');
 
 
 Route::post('/logout', function () {

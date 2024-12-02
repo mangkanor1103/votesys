@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Head } from '@inertiajs/react';
-import { Link } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa';
 import axios from 'axios';
 
@@ -10,15 +9,34 @@ export default function ManagePositions({ positions, electionId, flash }) {
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(flash?.success || null);
     const [storedElectionId, setStoredElectionId] = useState(null);
+    const [positionsData, setPositionsData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editPositionId, setEditPositionId] = useState(null);
 
     useEffect(() => {
         const storedElectionId = localStorage.getItem('election_id');
         setStoredElectionId(storedElectionId);
-    }, []);
 
-    const safePositions = positions || [];
+        const fetchPositions = async () => {
+            try {
+                const finalElectionId = electionId || storedElectionId;
+                if (finalElectionId) {
+                    const response = await axios.get(`/positions/${finalElectionId}`);
+                    setPositionsData(response.data); // Assuming response.data contains the positions
+                }
+            } catch (error) {
+                console.error('Error fetching positions:', error);
+                setError('An error occurred while fetching positions.');
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const handleCreatePosition = async (e) => {
+        fetchPositions();
+    }, [electionId, storedElectionId]);
+
+    const handleCreateOrUpdatePosition = async (e) => {
         e.preventDefault();
 
         if (!electionId && !storedElectionId) {
@@ -29,19 +47,61 @@ export default function ManagePositions({ positions, electionId, flash }) {
         const finalElectionId = electionId || storedElectionId;
 
         try {
-            const response = await axios.post(`/positions/${finalElectionId}`, {
-                name: positionName,
-                max_votes: maxVotes,
-            });
+            let response;
+            if (isEditing) {
+                // Update the position
+                response = await axios.put(`/positions/${finalElectionId}/${editPositionId}`, {
+                    name: positionName,
+                    max_votes: maxVotes,
+                });
+                setSuccess('Position updated successfully');
+                setIsEditing(false);
+                setEditPositionId(null);
+            } else {
+                // Create a new position
+                response = await axios.post(`/positions/${finalElectionId}`, {
+                    name: positionName,
+                    max_votes: maxVotes,
+                });
+                setSuccess('Position created successfully');
+            }
 
-            console.log('Position created:', response.data);
-
+            // Reset form fields
             setPositionName('');
             setMaxVotes('');
-            window.location.reload();
+            setPositionsData((prev) =>
+                isEditing
+                    ? prev.map((pos) =>
+                          pos.id === editPositionId
+                              ? { ...pos, name: positionName, max_votes: maxVotes }
+                              : pos
+                      )
+                    : [...prev, { id: response.data.id, name: positionName, max_votes: maxVotes }]
+            );
         } catch (error) {
-            console.error('Error creating position:', error);
-            setError('An error occurred while creating the position');
+            console.error('Error creating or updating position:', error);
+            setError('An error occurred while creating or updating the position');
+        }
+    };
+
+    const handleEdit = (position) => {
+        setIsEditing(true);
+        setEditPositionId(position.id);
+        setPositionName(position.name);
+        setMaxVotes(position.max_votes);
+    };
+
+    const handleDelete = async (positionId) => {
+        if (window.confirm('Are you sure you want to delete this position?')) {
+            try {
+                const finalElectionId = electionId || storedElectionId;
+                await axios.delete(`/positions/${finalElectionId}/${positionId}`);
+                setSuccess('Position deleted successfully');
+                setPositionsData((prev) => prev.filter((pos) => pos.id !== positionId));
+            } catch (error) {
+                console.error('Error deleting position:', error);
+                setError('An error occurred while deleting the position');
+            }
         }
     };
 
@@ -122,7 +182,7 @@ export default function ManagePositions({ positions, electionId, flash }) {
                             )}
 
                             <div className="mt-6">
-                                <form onSubmit={handleCreatePosition}>
+                                <form onSubmit={handleCreateOrUpdatePosition}>
                                     <div className="mb-4">
                                         <label htmlFor="positionName" className="block text-sm font-medium text-gray-700">
                                             Position Name
@@ -149,38 +209,47 @@ export default function ManagePositions({ positions, electionId, flash }) {
                                             required
                                         />
                                     </div>
-                                    <button
-                                        type="submit"
-                                        className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition duration-300 ease-in-out"
-                                    >
-                                        Add New Position
-                                    </button>
+                                    <div className="flex justify-end gap-4">
+                                        <button
+                                            type="submit"
+                                            className="bg-green-600 text-white py-2 px-6 rounded-lg"
+                                        >
+                                            {isEditing ? 'Update Position' : 'Create Position'}
+                                        </button>
+                                    </div>
                                 </form>
                             </div>
 
-                            {/* Display positions */}
                             <div className="mt-8">
-                                <table className="min-w-full table-auto">
-                                    <thead>
-                                        <tr className="bg-green-500 text-white">
-                                            <th className="px-4 py-2">Position</th>
-                                            <th className="px-4 py-2">Max Votes</th>
-                                            <th className="px-4 py-2">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {safePositions.map((position) => (
-                                            <tr key={position.id}>
-                                                <td className="px-4 py-2">{position.name}</td>
-                                                <td className="px-4 py-2">{position.max_votes}</td>
-                                                <td className="px-4 py-2">
-                                                    <button className="text-blue-600 hover:text-blue-800">Edit</button>
-                                                    <button className="ml-4 text-red-600 hover:text-red-800">Delete</button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                <h4 className="text-xl font-semibold text-green-600">Position List</h4>
+                                <ul className="mt-4">
+                                    {loading ? (
+                                        <li>Loading positions...</li>
+                                    ) : (
+                                        positionsData.map((position) => (
+                                            <li key={position.id} className="flex justify-between items-center py-2 border-b">
+                                                <div className="flex items-center">
+                                                    <span className="font-medium">{position.name}</span>
+                                                    <span className="ml-4 text-sm text-gray-500">Max Votes: {position.max_votes}</span>
+                                                </div>
+                                                <div className="space-x-4">
+                                                    <button
+                                                        onClick={() => handleEdit(position)}
+                                                        className="text-blue-600 hover:text-blue-800"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(position.id)}
+                                                        className="text-red-600 hover:text-red-800"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </li>
+                                        ))
+                                    )}
+                                </ul>
                             </div>
                         </div>
                     </div>
