@@ -16,40 +16,64 @@ export default function ManageVoters() {
         const storedElectionId = localStorage.getItem('election_id');
         if (storedElectionId) {
             setElectionId(storedElectionId);
+            fetchCodes(); // Fetch voter codes on component mount
         }
-    }, []);
+    }, [electionId]); // Dependency ensures it updates when electionId changes
+    
+    // Fetch generated voter codes for the current election
+    const fetchCodes = async () => {
+        if (!electionId) return; // Ensure election ID is set
+        try {
+            const response = await axios.get(`/voters/${electionId}`);
+            setGeneratedCodes(response.data.voters.map((voter) => voter.voter_code));
+        } catch (error) {
+            console.error('Error fetching voter codes:', error);
+            setErrors(['Failed to load voter codes.']);
+        }
+    };
 
+    // Handle generating new voter codes
     const handleGenerateCodes = async (event) => {
         event.preventDefault();
-
-        // Validation
-        if (!electionId) {
-            setErrors(['Please enter a valid election ID.']);
+    
+        if (!electionId || !numCodes || numCodes <= 0) {
+            setErrors(['Please ensure both Election ID and Number of Codes are valid.']);
             return;
         }
-
-        if (!numCodes || numCodes <= 0) {
-            setErrors(['Please enter a valid number of codes.']);
-            return;
-        }
-
+    
         setProcessing(true);
         try {
-            const response = await axios.post('/voters/generate', {
+            await axios.post('/voters/generate', {
                 election_id: electionId,
                 number_of_codes: numCodes,
             });
-
+    
             alert('Voter codes generated successfully!');
-            setGeneratedCodes(response.data.codes); // Update state with generated codes
+            fetchCodes(); // Fetch and update voter codes
             setNumCodes('');
             setErrors([]);
         } catch (error) {
             console.error('Error generating voter codes:', error);
-            alert('Failed to generate voter codes. Please try again.');
             setErrors([error.response?.data?.message || 'An error occurred']);
         } finally {
             setProcessing(false);
+        }
+    };
+
+    // Handle clearing all voter codes
+    const handleClearCodes = async () => {
+        if (!electionId) {
+            setErrors(['Election ID is required to clear codes.']);
+            return;
+        }
+
+        try {
+            await axios.delete(`/voters/${electionId}/clear`);
+            alert('All voter codes cleared successfully!');
+            setGeneratedCodes([]); // Clear state
+        } catch (error) {
+            console.error('Error clearing voter codes:', error);
+            setErrors(['Failed to clear voter codes.']);
         }
     };
 
@@ -119,13 +143,24 @@ export default function ManageVoters() {
                                     />
                                     {errors.length > 0 && <div className="text-red-500 mt-2">{errors.join(', ')}</div>}
                                 </div>
-                                <button
-                                    type="submit"
-                                    className="px-6 py-3 bg-green-700 text-white rounded-lg hover:bg-green-800"
-                                    disabled={processing}
-                                >
-                                    {processing ? 'Generating...' : 'Generate Codes'}
-                                </button>
+                                {/* Flex container for buttons */}
+                                <div className="flex space-x-4">
+                                    <button
+                                        type="submit"
+                                        className="px-6 py-3 bg-green-700 text-white rounded-lg hover:bg-green-800"
+                                        disabled={processing}
+                                    >
+                                        {processing ? 'Generating...' : 'Generate Codes'}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleClearCodes}
+                                        className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                                        disabled={processing} // Disable the button while generating
+                                    >
+                                        Clear All Codes
+                                    </button>
+                                </div>
                             </form>
 
                             {/* Display Generated Codes */}

@@ -8,14 +8,17 @@ use App\Http\Controllers\ShareController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\SubAdminController;
+use App\Http\Controllers\VoterController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PositionController;
-use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 
+// In routes/api.php or routes/web.php
+Route::delete('/voters/{electionId}/clear', [VoterController::class, 'clear']);
 
+Route::post('/voters/generate', [VoterController::class, 'generate']);
+Route::get('/voters/{electionId}', [VoterController::class, 'fetch']);
 // Fetch positions for a specific election
 Route::get('/positions/{electionId}', [PositionController::class, 'index'])->name('positions.index');
 
@@ -43,7 +46,7 @@ Route::get('/election', [ElectionController::class, 'showElectionPage']);
 Route::get('/api/candidates', [CandidateController::class, 'index']);
 Route::post('/api/candidates', [CandidateController::class, 'store']);
 Route::delete('/api/candidates/{id}', [CandidateController::class, 'destroy']);
-Route::post('/voters/generate', [VoterController::class, 'generateVoterCodes']);
+//Route::post('/voters/generate', [VoterController::class, 'generateVoterCodes']);
 
 Route::get('/users', function () {
     return Inertia::render('User/Users');

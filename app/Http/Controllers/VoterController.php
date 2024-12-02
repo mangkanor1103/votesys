@@ -1,42 +1,57 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Voter;
-use App\Models\Election;
+use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class VoterController extends Controller
 {
-    public function generateVoterCodes(Request $request)
+    public function generate(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'election_id' => 'required|exists:elections,id',
             'number_of_codes' => 'required|integer|min:1',
         ]);
 
-        $election = Election::find($validated['election_id']);
-        $numberOfCodes = $validated['number_of_codes'];
-
-        // Generate the voter codes
-        $voterCodes = [];
-        for ($i = 0; $i < $numberOfCodes; $i++) {
-            $voterCodes[] = $this->generateUniqueVoterCode();
-        }
-
-        // Store the codes in the database
-        foreach ($voterCodes as $code) {
+        $codes = [];
+        for ($i = 0; $i < $request->number_of_codes; $i++) {
+            $code = Str::random(8);
             Voter::create([
-                'election_id' => $election->id,
-                'code' => $code,
+                'election_id' => $request->election_id,
+                'voter_code' => $code,
             ]);
+            $codes[] = $code;
         }
 
-        return response()->json(['message' => 'Voter codes generated successfully!'], 200);
+        return response()->json(['codes' => $codes]);
     }
 
-    private function generateUniqueVoterCode()
-    {
-        // Generate a random, unique voter code
-        return strtoupper(bin2hex(random_bytes(4))); // Generates an 8-character code
+    public function fetch($electionId)
+{
+    $voters = Voter::where('election_id', $electionId)->get(['voter_code']);
+    return response()->json([
+        'voters' => $voters
+    ]);
+
+
+}
+
+public function clear($electionId)
+{
+    try {
+        // Delete all voter codes for the given election ID
+        Voter::where('election_id', $electionId)->delete();
+
+        return response()->json([
+            'message' => 'All voter codes cleared successfully!'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Failed to clear voter codes.',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
 }
