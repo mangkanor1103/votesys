@@ -13,7 +13,7 @@ export default function AuthenticatedLayout({ header, children }) {
 
     return (
         <div className="min-h-screen bg-green-900 text-green-50">
-            <nav className="border-b bg-green-800 shadow-lg">
+            <nav className="border-b bg-gradient-to-r from-green-700 via-teal-700 to-green-500 shadow-lg">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between items-center">
                         <div className="flex items-center">
@@ -26,7 +26,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <NavLink
                                     href={route('dashboard')}
                                     active={route().current('dashboard')}
-                                    className="text-green-200 hover:text-green-400"
+                                    className="text-green-200 hover:text-green-300"
                                 >
                                     Dashboard
                                 </NavLink>
@@ -34,7 +34,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <NavLink
                                     href={route('superadmin.elections')}
                                     active={route().current('superadmin.elections')}
-                                    className="text-green-200 hover:text-green-400"
+                                    className="text-green-200 hover:text-green-300"
                                 >
                                     Elections
                                 </NavLink>
@@ -96,7 +96,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         <ResponsiveNavLink
                             href={route('dashboard')}
                             active={route().current('dashboard')}
-                            className="text-green-200 hover:text-green-400"
+                            className="text-green-200 hover:text-green-300"
                         >
                             Dashboard
                         </ResponsiveNavLink>
@@ -104,7 +104,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         <ResponsiveNavLink
                             href={route('superadmin.elections')}
                             active={route().current('superadmin.elections')}
-                            className="text-green-200 hover:text-green-400"
+                            className="text-green-200 hover:text-green-300"
                         >
                             Elections
                         </ResponsiveNavLink>
@@ -117,10 +117,10 @@ export default function AuthenticatedLayout({ header, children }) {
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')} className="text-green-200 hover:text-green-400">
+                            <ResponsiveNavLink href={route('profile.edit')} className="text-green-200 hover:text-green-300">
                                 Profile
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink method="post" href={route('logout')} as="button" className="text-green-200 hover:text-green-400">
+                            <ResponsiveNavLink method="post" href={route('logout')} as="button" className="text-green-200 hover:text-green-300">
                                 Log Out
                             </ResponsiveNavLink>
                         </div>
@@ -129,7 +129,7 @@ export default function AuthenticatedLayout({ header, children }) {
             </nav>
 
             {header && (
-                <header className="bg-green-800 shadow-md">
+                <header className="bg-gradient-to-r from-green-700 via-teal-700 to-green-500 shadow-md">
                     <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
                         <h1 className="text-xl font-semibold text-green-50">{header}</h1>
                     </div>
