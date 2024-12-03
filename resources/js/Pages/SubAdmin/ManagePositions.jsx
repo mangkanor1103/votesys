@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa';
+import { FaPen, FaTrashAlt } from 'react-icons/fa';
 import axios from 'axios';
 
 export default function ManagePositions({ positions, electionId, flash }) {
@@ -114,7 +115,6 @@ export default function ManagePositions({ positions, electionId, flash }) {
         }
     };
 
-
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
             <Head title="Manage Positions" />
@@ -123,12 +123,10 @@ export default function ManagePositions({ positions, electionId, flash }) {
             <nav className="bg-transparent text-white shadow-lg border-b-4 border-green-300 transition duration-500 ease-in-out transform hover:scale-105">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col sm:flex-row justify-between items-center">
-                        {/* Title */}
                         <h2 className="text-3xl font-extrabold text-green-100 tracking-wide">
                             Mindoro State University Voting System
                         </h2>
 
-                        {/* Navigation Links */}
                         <div className="flex flex-col sm:flex-row items-center gap-6 mt-4 sm:mt-0">
                             <Link
                                 href={route('subdashboard')}
@@ -213,47 +211,50 @@ export default function ManagePositions({ positions, electionId, flash }) {
                                             required
                                         />
                                     </div>
-                                    <div className="flex justify-end gap-4">
-                                        <button
-                                            type="submit"
-                                            className="bg-green-600 text-white py-2 px-6 rounded-lg"
-                                        >
-                                            {isEditing ? 'Update Position' : 'Create Position'}
-                                        </button>
-                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300 ease-in-out"
+                                    >
+                                        {isEditing ? 'Update Position' : 'Create Position'}
+                                    </button>
                                 </form>
                             </div>
 
                             <div className="mt-8">
-                                <h4 className="text-xl font-semibold text-green-600">Position List</h4>
-                                <ul className="mt-4">
-                                    {loading ? (
-                                        <li>Loading positions...</li>
-                                    ) : (
-                                        positionsData.map((position) => (
-                                            <li key={position.id} className="flex justify-between items-center py-2 border-b">
-                                                <div className="flex items-center">
-                                                    <span className="font-medium">{position.name}</span>
-                                                    <span className="ml-4 text-sm text-gray-500">Max Votes: {position.max_votes}</span>
+                                <h3 className="text-xl font-medium text-gray-900 mb-4">Position List</h3>
+                                {loading ? (
+                                    <div>Loading...</div>
+                                ) : (
+                                    <div className="space-y-4">
+                                        {positionsData.map((position) => (
+                                            <div
+                                                key={position.id}
+                                                className="bg-white p-4 rounded-lg shadow-md transition transform hover:scale-105 hover:shadow-xl"
+                                            >
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex flex-col">
+                                                        <h4 className="text-xl font-semibold text-gray-800">{position.name}</h4>
+                                                        <span className="text-sm text-gray-600">Max Votes: {position.max_votes}</span>
+                                                    </div>
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => handleEdit(position)}
+                                                            className="text-blue-600 hover:text-blue-800 transition duration-200"
+                                                        >
+                                                            <FaPen className="text-lg" />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(position.id)}
+                                                            className="text-red-600 hover:text-red-800 transition duration-200"
+                                                        >
+                                                            <FaTrashAlt className="text-lg" />
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <div className="space-x-4">
-                                                    <button
-                                                        onClick={() => handleEdit(position)}
-                                                        className="text-blue-600 hover:text-blue-800"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(position.id)}
-                                                        className="text-red-600 hover:text-red-800"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </li>
-                                        ))
-                                    )}
-                                </ul>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

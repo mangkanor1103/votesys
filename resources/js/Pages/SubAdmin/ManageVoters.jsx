@@ -6,23 +6,21 @@ import axios from 'axios';
 
 export default function ManageVoters() {
     const [numCodes, setNumCodes] = useState('');
-    const [electionId, setElectionId] = useState(''); // State for election ID
+    const [electionId, setElectionId] = useState('');
     const [errors, setErrors] = useState([]);
     const [processing, setProcessing] = useState(false);
     const [generatedCodes, setGeneratedCodes] = useState([]);
 
-    // Automatically populate election ID from localStorage
     useEffect(() => {
         const storedElectionId = localStorage.getItem('election_id');
         if (storedElectionId) {
             setElectionId(storedElectionId);
-            fetchCodes(); // Fetch voter codes on component mount
+            fetchCodes();
         }
-    }, [electionId]); // Dependency ensures it updates when electionId changes
-    
-    // Fetch generated voter codes for the current election
+    }, [electionId]);
+
     const fetchCodes = async () => {
-        if (!electionId) return; // Ensure election ID is set
+        if (!electionId) return;
         try {
             const response = await axios.get(`/voters/${electionId}`);
             setGeneratedCodes(response.data.voters.map((voter) => voter.voter_code));
@@ -32,24 +30,23 @@ export default function ManageVoters() {
         }
     };
 
-    // Handle generating new voter codes
     const handleGenerateCodes = async (event) => {
         event.preventDefault();
-    
+
         if (!electionId || !numCodes || numCodes <= 0) {
             setErrors(['Please ensure both Election ID and Number of Codes are valid.']);
             return;
         }
-    
+
         setProcessing(true);
         try {
             await axios.post('/voters/generate', {
                 election_id: electionId,
                 number_of_codes: numCodes,
             });
-    
+
             alert('Voter codes generated successfully!');
-            fetchCodes(); // Fetch and update voter codes
+            fetchCodes();
             setNumCodes('');
             setErrors([]);
         } catch (error) {
@@ -60,7 +57,6 @@ export default function ManageVoters() {
         }
     };
 
-    // Handle clearing all voter codes
     const handleClearCodes = async () => {
         if (!electionId) {
             setErrors(['Election ID is required to clear codes.']);
@@ -70,7 +66,7 @@ export default function ManageVoters() {
         try {
             await axios.delete(`/voters/${electionId}/clear`);
             alert('All voter codes cleared successfully!');
-            setGeneratedCodes([]); // Clear state
+            setGeneratedCodes([]);
         } catch (error) {
             console.error('Error clearing voter codes:', error);
             setErrors(['Failed to clear voter codes.']);
@@ -108,76 +104,81 @@ export default function ManageVoters() {
                 </div>
             </nav>
 
-            {/* Main Content */}
-            <div className="py-12">
-                <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">
-                    <div className="bg-white shadow-xl sm:rounded-lg border-t-4 border-green-500">
-                        <div className="p-8">
-                            <h3 className="text-2xl font-medium text-green-600 mb-6">Generate Voter Codes</h3>
-                            <form onSubmit={handleGenerateCodes}>
-                                <div className="mb-4">
-                                    <label htmlFor="electionId" className="block text-lg text-gray-600">
-                                        Election ID:
-                                    </label>
-                                    <input
-                                        type="text"
-                                        id="electionId"
-                                        value={electionId}
-                                        onChange={(e) => setElectionId(e.target.value)}
-                                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-green-300"
-                                        required
-                                        readOnly // Election ID is read-only
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label htmlFor="numCodes" className="block text-lg text-gray-600">
-                                        Number of Voter Codes to Generate:
-                                    </label>
-                                    <input
-                                        type="number"
-                                        id="numCodes"
-                                        value={numCodes}
-                                        onChange={(e) => setNumCodes(e.target.value)}
-                                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:border-green-300"
-                                        required
-                                    />
-                                    {errors.length > 0 && <div className="text-red-500 mt-2">{errors.join(', ')}</div>}
-                                </div>
-                                {/* Flex container for buttons */}
-                                <div className="flex space-x-4">
-                                    <button
-                                        type="submit"
-                                        className="px-6 py-3 bg-green-700 text-white rounded-lg hover:bg-green-800"
-                                        disabled={processing}
-                                    >
-                                        {processing ? 'Generating...' : 'Generate Codes'}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={handleClearCodes}
-                                        className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                                        disabled={processing} // Disable the button while generating
-                                    >
-                                        Clear All Codes
-                                    </button>
-                                </div>
-                            </form>
-
-                            {/* Display Generated Codes */}
-                            {generatedCodes.length > 0 && (
-                                <div className="mt-6">
-                                    <h4 className="text-lg font-semibold text-green-600">Generated Voter Codes:</h4>
-                                    <ul className="mt-2 list-disc pl-6">
-                                        {generatedCodes.map((code, index) => (
-                                            <li key={index} className="text-gray-700">{code}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
+{/* Main Content */}
+<div className="py-12">
+    <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">
+        <div className="bg-white shadow-xl sm:rounded-lg border-t-4 border-green-500">
+            <div className="p-8">
+                <h3 className="text-2xl font-semibold text-green-700 mb-6">Generate Voter Codes</h3>
+                <form onSubmit={handleGenerateCodes}>
+                    {/* Election ID Section */}
+                    <div className="mb-6">
+                        <label htmlFor="electionId" className="block text-lg text-gray-600 font-medium mb-2">
+                            Election ID:
+                        </label>
+                        <input
+                            type="text"
+                            id="electionId"
+                            value={electionId}
+                            onChange={(e) => setElectionId(e.target.value)}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-500 transition duration-300"
+                            required
+                            readOnly
+                        />
                     </div>
-                </div>
+
+                    {/* Number of Codes Section */}
+                    <div className="mb-6">
+                        <label htmlFor="numCodes" className="block text-lg text-gray-600 font-medium mb-2">
+                            Number of Voter Codes to Generate:
+                        </label>
+                        <input
+                            type="number"
+                            id="numCodes"
+                            value={numCodes}
+                            onChange={(e) => setNumCodes(e.target.value)}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-500 transition duration-300"
+                            required
+                        />
+                        {errors.length > 0 && <div className="text-red-500 mt-2">{errors.join(', ')}</div>}
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex space-x-6 justify-between">
+                        <button
+                            type="submit"
+                            className="w-1/2 px-6 py-3 bg-green-700 text-white rounded-lg hover:bg-green-800 transition duration-300"
+                            disabled={processing}
+                        >
+                            {processing ? 'Generating...' : 'Generate Codes'}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleClearCodes}
+                            className="w-1/2 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-300"
+                            disabled={processing}
+                        >
+                            Clear All Codes
+                        </button>
+                    </div>
+                </form>
+
+                {/* Display Generated Codes */}
+                {generatedCodes.length > 0 && (
+                    <div className="mt-8">
+                        <h4 className="text-lg font-semibold text-green-600 mb-4">Generated Voter Codes:</h4>
+                        <ul className="space-y-2">
+                            {generatedCodes.map((code, index) => (
+                                <li key={index} className="bg-gray-50 p-3 rounded-lg shadow-sm hover:shadow-md transition duration-200">{code}</li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             </div>
+        </div>
+    </div>
+</div>
+
         </div>
     );
 }

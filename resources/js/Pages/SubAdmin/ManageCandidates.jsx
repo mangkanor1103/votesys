@@ -3,129 +3,52 @@ import { Head, Link } from '@inertiajs/react';
 import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa';
 import axios from 'axios';
 
-export default function ManageCandidates({ electionId, flash }) {
-    const [name, setName] = useState('');
-    const [party, setParty] = useState('');
-    const [photo, setPhoto] = useState(null);
-    const [positionId, setPositionId] = useState('');
-    const [error, setError] = useState(null);
-    const [success, setSuccess] = useState(flash?.success || null);
-    const [storedElectionId, setStoredElectionId] = useState(null);
-    const [candidatesData, setCandidatesData] = useState([]);
-    const [loading, setLoading] = useState(true);
+export default function ManagePositions({ positions, electionId, flash }) {
     const [positionsData, setPositionsData] = useState([]);
-    const [isEditing, setIsEditing] = useState(false);
-    const [editCandidateId, setEditCandidateId] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [selectedPosition, setSelectedPosition] = useState('');
+    const [candidates, setCandidates] = useState([]);
 
     useEffect(() => {
         const storedElectionId = localStorage.getItem('election_id');
-        setStoredElectionId(storedElectionId);
+        const finalElectionId = electionId || storedElectionId;
 
-        const fetchData = async () => {
+        const fetchPositions = async () => {
             try {
-                const finalElectionId = electionId || storedElectionId;
                 if (finalElectionId) {
-                    // Fetch positions for the select dropdown
-                    const positionsResponse = await axios.get(`/positions/${finalElectionId}`);
-                    setPositionsData(positionsResponse.data);
-
-                    // Fetch candidates for the election
-                    const candidatesResponse = await axios.get(`/candidates/${finalElectionId}`);
-                    setCandidatesData(candidatesResponse.data);
+                    const response = await axios.get(`/positions/${finalElectionId}`);
+                    setPositionsData(response.data); // Assuming response.data contains the positions
                 }
             } catch (error) {
-                console.error('Error fetching data:', error);
-                setError('An error occurred while fetching data.');
+                console.error('Error fetching positions:', error);
+                setError('An error occurred while fetching positions.');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchData();
-    }, [electionId, storedElectionId]);
+        fetchPositions();
+    }, [electionId]);
 
-    const handleCreateOrUpdateCandidate = async (e) => {
-        e.preventDefault();
-
-        if (!electionId && !storedElectionId) {
-            setError('Election ID is missing');
-            return;
-        }
-
-        const finalElectionId = electionId || storedElectionId;
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('party', party);
-        if (photo) {
-            formData.append('photo', photo);
-        }
-        formData.append('position_id', positionId);
-
+    const fetchCandidates = async (positionId) => {
         try {
-            let response;
-            if (isEditing) {
-                // Update the candidate
-                response = await axios.put(`/candidates/${finalElectionId}/${editCandidateId}`, formData);
-                setSuccess('Candidate updated successfully');
-                setIsEditing(false);
-                setEditCandidateId(null);
-            } else {
-                // Create a new candidate
-                response = await axios.post(`/candidates/${finalElectionId}`, formData);
-                setSuccess('Candidate created successfully');
-            }
-
-            // Reset form fields
-            setName('');
-            setParty('');
-            setPhoto(null);
-            setPositionId('');
-            setCandidatesData((prev) =>
-                isEditing
-                    ? prev.map((candidate) =>
-                          candidate.id === editCandidateId
-                              ? { ...candidate, name, party, position_id: positionId, photo: response.data.photo }
-                              : candidate
-                      )
-                    : [...prev, { id: response.data.id, name, party, position_id: positionId, photo: response.data.photo }]
-            );
+            const response = await axios.get(`/candidates/${positionId}`);
+            setCandidates(response.data); // Assuming the response contains candidate data
         } catch (error) {
-            console.error('Error creating or updating candidate:', error);
-            setError('An error occurred while creating or updating the candidate');
+            console.error('Error fetching candidates:', error);
         }
     };
 
-    const handleEdit = (candidate) => {
-        setIsEditing(true);
-        setEditCandidateId(candidate.id);
-        setName(candidate.name);
-        setParty(candidate.party);
-        setPositionId(candidate.position_id);
-    };
-
-    const handleDelete = async (candidateId) => {
-        if (window.confirm('Are you sure you want to delete this candidate?')) {
-            try {
-                const finalElectionId = electionId || storedElectionId;
-                await axios.delete(`/candidates/${finalElectionId}/${candidateId}`);
-                setSuccess('Candidate deleted successfully');
-                setCandidatesData((prev) => prev.filter((candidate) => candidate.id !== candidateId));
-            } catch (error) {
-                console.error('Error deleting candidate:', error);
-                setError('An error occurred while deleting the candidate');
-            }
-        }
-    };
-
-    const handleLogout = () => {
-        axios.post('/logout').then(() => {
-            window.location.href = '/login';
-        });
+    const handlePositionChange = (e) => {
+        const positionId = e.target.value;
+        setSelectedPosition(positionId);
+        fetchCandidates(positionId);
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
-            <Head title="Manage Candidates" />
+            <Head title="Manage Positions" />
 
             {/* Navbar */}
             <nav className="bg-transparent text-white shadow-lg border-b-4 border-green-300 transition duration-500 ease-in-out transform hover:scale-105">
@@ -163,7 +86,7 @@ export default function ManageCandidates({ electionId, flash }) {
                                 <FaChalkboardTeacher className="text-xl" /> Manage Candidates
                             </Link>
                             <button
-                                onClick={handleLogout}
+                                onClick={() => axios.post('/logout').then(() => window.location.href = '/login')}
                                 className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
                             >
                                 <FaSignOutAlt className="text-xl" /> Logout
@@ -178,146 +101,72 @@ export default function ManageCandidates({ electionId, flash }) {
                 <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-xl sm:rounded-lg border-t-4 border-green-500">
                         <div className="p-8 text-gray-900">
-                            <h3 className="text-2xl font-medium text-green-600 mb-6">
-                                Manage Candidates
-                            </h3>
+                            <h3 className="text-2xl font-medium text-green-600 mb-6">Manage Positions</h3>
 
-                            {success && (
-                                <div className="mt-4 p-4 bg-green-200 text-green-700 rounded-md">
-                                    {success}
-                                </div>
-                            )}
                             {error && (
                                 <div className="mt-4 p-4 bg-red-200 text-red-700 rounded-md">
                                     {error}
                                 </div>
                             )}
 
-                            <div className="mt-6">
-                                <form onSubmit={handleCreateOrUpdateCandidate} encType="multipart/form-data">
-                                    <div className="mb-4">
-                                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                            Candidate Name
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="name"
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                            value={name}
-                                            onChange={(e) => setName(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label htmlFor="party" className="block text-sm font-medium text-gray-700">
-                                            Political Party
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="party"
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                            value={party}
-                                            onChange={(e) => setParty(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label htmlFor="photo" className="block text-sm font-medium text-gray-700">
-                                            Candidate Photo
-                                        </label>
-                                        <input
-                                            type="file"
-                                            id="photo"
-                                            className="mt-1 block w-full text-sm text-gray-700 border border-gray-300 rounded-md shadow-sm"
-                                            onChange={(e) => setPhoto(e.target.files[0])}
-                                        />
-                                    </div>
-                                    <div className="mb-4">
-                                        <label htmlFor="position_id" className="block text-sm font-medium text-gray-700">
-                                            Position
-                                        </label>
+                            <div className="mt-8">
+                                <h4 className="text-xl font-semibold text-green-600">Select Position</h4>
+                                {loading ? (
+                                    <p>Loading positions...</p>
+                                ) : (
+                                    <div className="mt-4">
                                         <select
-                                            id="position_id"
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                            value={positionId}
-                                            onChange={(e) => setPositionId(e.target.value)}
-                                            required
+                                            value={selectedPosition}
+                                            onChange={handlePositionChange}
+                                            className="w-full px-4 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600"
                                         >
-                                            <option value="">Select Position</option>
+                                            <option value="">Select a position</option>
                                             {positionsData.map((position) => (
                                                 <option key={position.id} value={position.id}>
-                                                    {position.name}
+                                                    {position.name} - Election ID: {position.election_id}
                                                 </option>
                                             ))}
                                         </select>
                                     </div>
-                                    <button
-                                        type="submit"
-                                        className="mt-4 px-6 py-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600"
-                                    >
-                                        {isEditing ? 'Update Candidate' : 'Create Candidate'}
-                                    </button>
-                                </form>
+                                )}
                             </div>
 
-                            <div className="mt-8">
-                                <h4 className="text-xl font-medium text-green-600 mb-4">Candidates List</h4>
-                                <table className="min-w-full table-auto">
-                                    <thead>
-                                        <tr>
-                                            <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900">
-                                                Name
-                                            </th>
-                                            <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900">
-                                                Party
-                                            </th>
-                                            <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900">
-                                                Position
-                                            </th>
-                                            <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900">
-                                                Photo
-                                            </th>
-                                            <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {candidatesData.map((candidate) => (
-                                            <tr key={candidate.id}>
-                                                <td className="px-4 py-2 border-b text-sm text-gray-700">{candidate.name}</td>
-                                                <td className="px-4 py-2 border-b text-sm text-gray-700">{candidate.party}</td>
-                                                <td className="px-4 py-2 border-b text-sm text-gray-700">
-                                                    {positionsData.find((position) => position.id === candidate.position_id)?.name}
-                                                </td>
-                                                <td className="px-4 py-2 border-b text-sm text-gray-700">
-                                                    {candidate.photo && (
-                                                        <img
-                                                            src={`/storage/${candidate.photo}`}
-                                                            alt={candidate.name}
-                                                            className="h-12 w-12 object-cover rounded-full"
-                                                        />
-                                                    )}
-                                                </td>
-                                                <td className="px-4 py-2 border-b text-sm text-gray-700">
-                                                    <button
-                                                        onClick={() => handleEdit(candidate)}
-                                                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(candidate.id)}
-                                                        className="ml-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </td>
-                                            </tr>
+                            {selectedPosition && (
+                                <div className="mt-8">
+                                    <h4 className="text-xl font-semibold text-green-600">Selected Position</h4>
+                                    <div className="mt-4">
+                                        <label className="block text-lg text-green-600">Position</label>
+                                        <input
+                                            type="text"
+                                            value={positionsData.find(pos => String(pos.id) === String(selectedPosition))?.name || ''}
+                                            disabled
+                                            className="w-full px-4 py-2 border border-green-300 rounded-md bg-gray-100 text-gray-500"
+                                        />
+                                    </div>
+                                    <div className="mt-4">
+                                        <label className="block text-lg text-green-600">Election ID</label>
+                                        <input
+                                            type="text"
+                                            value={positionsData.find(pos => String(pos.id) === String(selectedPosition))?.election_id || ''}
+                                            disabled
+                                            className="w-full px-4 py-2 border border-green-300 rounded-md bg-gray-100 text-gray-500"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {candidates.length > 0 && (
+                                <div className="mt-8">
+                                    <h4 className="text-xl font-semibold text-green-600">Candidates for {positionsData.find(pos => String(pos.id) === String(selectedPosition))?.name}</h4>
+                                    <ul className="mt-4">
+                                        {candidates.map((candidate) => (
+                                            <li key={candidate.id} className="flex items-center justify-between py-2">
+                                                <span>{candidate.name}</span>
+                                            </li>
                                         ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    </ul>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
