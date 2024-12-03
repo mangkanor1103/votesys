@@ -31,7 +31,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
             data: { voter_code: data.voter_code },
             onSuccess: () => {
                 // Redirect to voter dashboard after successful login
-                window.location.href = "/voter/dashboard"; // Adjust URL if needed
+                window.location.href = "/voter/dashboard?election_id=${id}&voter_code=${code}&election_name=${name}&election_date=${date}`;
             },
             onError: (errors) => {
                 // Handle error, display error message if any
