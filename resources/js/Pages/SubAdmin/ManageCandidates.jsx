@@ -7,10 +7,10 @@ export default function ManagePositions({ positions, electionId, flash }) {
     const [positionsData, setPositionsData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedPosition, setSelectedPosition] = useState('');
-    const [candidates, setCandidates] = useState([]);
-    const [candidateName, setCandidateName] = useState(''); // For candidate name
-    const [candidatePlatform, setCandidatePlatform] = useState(''); // For candidate platform
+    const [selectedPosition, setSelectedPosition] = useState(localStorage.getItem('selectedPosition') || ''); // Persist selected position
+    const [candidates, setCandidates] = useState(JSON.parse(localStorage.getItem('candidates')) || []); // Persist candidates
+    const [candidateName, setCandidateName] = useState(localStorage.getItem('candidateName') || ''); // Persist candidate name
+    const [candidatePlatform, setCandidatePlatform] = useState(localStorage.getItem('candidatePlatform') || ''); // Persist candidate platform
 
     useEffect(() => {
         const storedElectionId = localStorage.getItem('election_id');
@@ -37,6 +37,7 @@ export default function ManagePositions({ positions, electionId, flash }) {
         try {
             const response = await axios.get(`/candidates/${positionId}`);
             setCandidates(response.data); // Assuming the response contains candidate data
+            localStorage.setItem('candidates', JSON.stringify(response.data)); // Save candidates in localStorage
         } catch (error) {
             console.error('Error fetching candidates:', error);
         }
@@ -45,6 +46,7 @@ export default function ManagePositions({ positions, electionId, flash }) {
     const handlePositionChange = (e) => {
         const positionId = e.target.value;
         setSelectedPosition(positionId);
+        localStorage.setItem('selectedPosition', positionId); // Persist position in localStorage
         fetchCandidates(positionId);
     };
 
@@ -61,16 +63,28 @@ export default function ManagePositions({ positions, electionId, flash }) {
             const response = await axios.post('/candidates', newCandidate);
 
             // Add the new candidate to the list (assuming successful response)
-            setCandidates([...candidates, response.data]);
+            const updatedCandidates = [...candidates, response.data];
+            setCandidates(updatedCandidates);
+
+            // Save updated candidates in localStorage
+            localStorage.setItem('candidates', JSON.stringify(updatedCandidates));
 
             // Clear the input fields
             setCandidateName('');
             setCandidatePlatform('');
+            localStorage.removeItem('candidateName');
+            localStorage.removeItem('candidatePlatform');
         } catch (error) {
             console.error('Error adding candidate:', error);
             setError('An error occurred while adding the candidate.');
         }
     };
+
+    // Persist candidate name and platform when they change
+    useEffect(() => {
+        localStorage.setItem('candidateName', candidateName);
+        localStorage.setItem('candidatePlatform', candidatePlatform);
+    }, [candidateName, candidatePlatform]);
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
@@ -178,48 +192,61 @@ export default function ManagePositions({ positions, electionId, flash }) {
                                             className="w-full px-4 py-2 border border-green-300 rounded-md bg-gray-100 text-gray-500"
                                         />
                                     </div>
-
-                                    {/* Candidate Name and Platform */}
-                                    <div className="mt-8">
-                                        <h4 className="text-xl font-semibold text-green-600">Add Candidate</h4>
-                                        <div className="mt-4">
-                                            <label className="block text-lg text-green-600">Candidate Name</label>
-                                            <input
-                                                type="text"
-                                                value={candidateName}
-                                                onChange={(e) => setCandidateName(e.target.value)}
-                                                className="w-full px-4 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600"
-                                            />
-                                        </div>
-                                        <div className="mt-4">
-                                            <label className="block text-lg text-green-600">Platform</label>
-                                            <textarea
-                                                value={candidatePlatform}
-                                                onChange={(e) => setCandidatePlatform(e.target.value)}
-                                                className="w-full px-4 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600"
-                                            />
-                                        </div>
-                                        <button
-                                            onClick={handleAddCandidate}
-                                            className="mt-4 bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition duration-300"
-                                        >
-                                            Add Candidate
-                                        </button>
-                                    </div>
                                 </div>
                             )}
 
-                            {/* Display Candidates */}
+                            {/* Form to Add a Candidate */}
+                            <div className="mt-8">
+                                <h4 className="text-xl font-semibold text-green-600">Add Candidate</h4>
+                                <div className="mt-4">
+                                    <label className="block text-lg text-green-600">Candidate Name</label>
+                                    <input
+                                        type="text"
+                                        value={candidateName}
+                                        onChange={(e) => setCandidateName(e.target.value)}
+                                        className="w-full px-4 py-2 border border-green-300 rounded-md"
+                                    />
+                                </div>
+                                <div className="mt-4">
+                                    <label className="block text-lg text-green-600">Platform</label>
+                                    <textarea
+                                        value={candidatePlatform}
+                                        onChange={(e) => setCandidatePlatform(e.target.value)}
+                                        className="w-full px-4 py-2 border border-green-300 rounded-md"
+                                    />
+                                </div>
+                                <button
+                                    onClick={handleAddCandidate}
+                                    className="mt-6 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                                >
+                                    Add Candidate
+                                </button>
+                            </div>
+
+                            {/* Display Candidates Table */}
                             {candidates.length > 0 && (
                                 <div className="mt-8">
                                     <h4 className="text-xl font-semibold text-green-600">Candidates</h4>
-                                    <ul className="mt-4">
-                                        {candidates.map((candidate) => (
-                                            <li key={candidate.id} className="py-2 border-b border-green-200">
-                                                {candidate.name} - Platform: {candidate.platform}
-                                            </li>
-                                        ))}
-                                    </ul>
+                                    <table className="min-w-full table-auto mt-4">
+                                        <thead>
+                                            <tr>
+                                                <th className="px-4 py-2 border-b text-left">Candidate Name</th>
+                                                <th className="px-4 py-2 border-b text-left">Position</th>
+                                                <th className="px-4 py-2 border-b text-left">Platform</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {candidates.map((candidate) => (
+                                                <tr key={candidate.id} className="hover:bg-gray-100">
+                                                    <td className="px-4 py-2 border-b">{candidate.name}</td>
+                                                    <td className="px-4 py-2 border-b">
+                                                        {positionsData.find(pos => String(pos.id) === String(candidate.position_id))?.name || 'N/A'}
+                                                    </td>
+                                                    <td className="px-4 py-2 border-b">{candidate.platform}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
                             )}
                         </div>
