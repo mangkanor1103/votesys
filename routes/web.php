@@ -15,6 +15,12 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 
+
+Route::post('/voter/login', [VoterController::class, 'login'])->name('voter.login');
+// Routes/web.php
+
+Route::get('voter/dashboard/{id}', [VoterController::class, 'dashboard'])->name('voter.dashboard');
+
 // Store a new candidate
 Route::post('/candidates', [CandidateController::class, 'store']);
 
