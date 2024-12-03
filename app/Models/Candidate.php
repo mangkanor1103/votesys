@@ -10,21 +10,14 @@ class Candidate extends Model
     use HasFactory;
 
     protected $fillable = [
-        'position_id',
         'name',
         'party',
+        'position_id',
         'photo',
     ];
 
-    /**
-     * Get the position that the candidate belongs to.
-     */
     public function position()
     {
         return $this->belongsTo(Position::class);
-    }
-    public function election()
-    {
-        return $this->belongsTo(Election::class);
     }
 }

@@ -15,13 +15,10 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 
-// Fetch all voters (voter codes) for a given election
-// Route to fetch voters for a specific election
-Route::get('/voters/{electionId}', [VoterController::class, 'index'])->name('voters.index');
-Route::get('/voters/{electionId}', [VoterController::class, 'getVoterCodes']);
+Route::delete('/voters/{electionId}/clear', [VoterController::class, 'clear']);
 
-// Route to generate voter codes for an election
-Route::post('/voters/generate', [VoterController::class, 'generateVoterCodes'])->name('voters.generate');
+Route::post('/voters/generate', [VoterController::class, 'generate']);
+Route::get('/voters/{electionId}', [VoterController::class, 'fetch']);
 
 // Fetch positions for a specific election
 Route::get('/positions/{electionId}', [PositionController::class, 'index'])->name('positions.index');
@@ -33,17 +30,11 @@ Route::put('/positions/{electionId}/{positionId}', [PositionController::class, '
 // Delete a position
 Route::delete('/positions/{electionId}/{positionId}', [PositionController::class, 'destroy'])->name('positions.destroy');
 
-// routes/web.php
-
-// Display candidates for a specific position
-Route::get('positions/{positionId}/candidates', [CandidateController::class, 'index']);
-
-// Store a new candidate or update an existing one
-Route::post('positions/{positionId}/candidates', [CandidateController::class, 'storeOrUpdate']); // For creating a new candidate
-Route::put('positions/{positionId}/candidates/{candidateId}', [CandidateController::class, 'storeOrUpdate']); // For updating an existing candidate
-
-// Delete a candidate
-Route::delete('positions/{positionId}/candidates/{candidateId}', [CandidateController::class, 'destroy']);
+Route::get('candidates', [CandidateController::class, 'index'])->name('candidates.index');
+Route::post('candidates', [CandidateController::class, 'store'])->name('candidates.store');
+Route::get('candidates/{id}/edit', [CandidateController::class, 'edit'])->name('candidates.edit');
+Route::put('candidates/{id}', [CandidateController::class, 'update'])->name('candidates.update');
+Route::delete('candidates/{id}', [CandidateController::class, 'destroy'])->name('candidates.destroy');
 
 
 Route::get('/election', [ElectionController::class, 'showElectionPage']);

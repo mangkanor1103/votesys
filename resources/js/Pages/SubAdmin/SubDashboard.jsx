@@ -1,6 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
-import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt, FaBars } from 'react-icons/fa';
 
 export default function Welcome() {
     const { post } = useForm();
@@ -8,6 +8,7 @@ export default function Welcome() {
     const [electionId, setElectionId] = useState('');
     const [electionName, setElectionName] = useState('');
     const [electionDate, setElectionDate] = useState('');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
         // Fetch election details from localStorage
@@ -39,8 +40,18 @@ export default function Welcome() {
                             Mindoro State University Voting System
                         </h2>
 
+                        {/* Hamburger Icon */}
+                        <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="sm:hidden text-white text-2xl"
+                        >
+                            <FaBars />
+                        </button>
+
                         {/* Navigation Links */}
-                        <div className="flex flex-col sm:flex-row items-center gap-6 mt-4 sm:mt-0">
+                        <div
+                            className={`flex flex-col sm:flex-row items-center gap-6 mt-4 sm:mt-0 sm:flex ${isMenuOpen ? 'block' : 'hidden'}`}
+                        >
                             <Link
                                 href={route('subdashboard')}
                                 className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
@@ -87,19 +98,23 @@ export default function Welcome() {
                             <p className="text-gray-600 text-lg">
                                 Please proceed to manage elections, voters, and candidates efficiently.
                             </p>
-                            <div className="mt-6">
-                                <p className="text-green-700 text-lg font-semibold">
-                                    Election Code: <span className="text-gray-800">{electionCode}</span>
-                                </p>
-                                <p className="text-green-700 text-lg font-semibold">
-                                    Election ID: <span className="text-gray-800">{electionId}</span>
-                                </p>
-                                <p className="text-green-700 text-lg font-semibold">
-                                    Election Name: <span className="text-gray-800">{electionName}</span>
-                                </p>
-                                <p className="text-green-700 text-lg font-semibold">
-                                    Election Date: <span className="text-gray-800">{electionDate}</span>
-                                </p>
+                            <div className="mt-6 space-y-4">
+                                <div className="text-green-700 text-lg font-semibold">
+                                    <p className="text-xl font-semibold">Election Code:</p>
+                                    <p className="text-gray-800 text-2xl">{electionCode}</p>
+                                </div>
+                                <div className="text-green-700 text-lg font-semibold">
+                                    <p className="text-xl font-semibold">Election ID:</p>
+                                    <p className="text-gray-800 text-2xl">{electionId}</p>
+                                </div>
+                                <div className="text-green-700 text-lg font-semibold">
+                                    <p className="text-xl font-semibold">Election Name:</p>
+                                    <p className="text-gray-800 text-2xl">{electionName}</p>
+                                </div>
+                                <div className="text-green-700 text-lg font-semibold">
+                                    <p className="text-xl font-semibold">Election Date:</p>
+                                    <p className="text-gray-800 text-2xl">{electionDate}</p>
+                                </div>
                             </div>
                         </div>
                     </div>

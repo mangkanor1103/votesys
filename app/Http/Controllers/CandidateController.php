@@ -5,94 +5,92 @@ namespace App\Http\Controllers;
 use App\Models\Candidate;
 use App\Models\Position;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class CandidateController extends Controller
 {
-    /**
-     * Display the candidates for a given position.
-     *
-     * @param  int  $positionId
-     * @return \Illuminate\Http\Response
-     */
-    public function index($positionId)
+    public function index()
     {
-        // Fetch the candidates for the given position
-        $candidates = Candidate::where('position_id', $positionId)->get();
-
-        return response()->json($candidates);
+        $candidates = Candidate::all();
+        $positions = Position::all();
+        return view('candidates.index', compact('candidates', 'positions'));
     }
 
-    /**
-     * Store a new candidate or update an existing one.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $positionId
-     * @param  int|null  $candidateId
-     * @return \Illuminate\Http\Response
-     */
-    public function storeOrUpdate(Request $request, $positionId, $candidateId = null)
+    public function store(Request $request)
     {
-        // Validate the incoming data
-        $validator = Validator::make($request->all(), [
+        $request->validate([
             'name' => 'required|string|max:255',
             'party' => 'required|string|max:255',
+            'position_id' => 'required|exists:positions,id',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
-        }
-
-        // Handle file upload for the candidate's photo (if provided)
         $photoPath = null;
-        if ($request->hasFile('photo')) {
-            $photoPath = $request->file('photo')->store('public/candidate_photos');
+        if ($request->hasFile('photo') && $request->file('photo')->isValid()) {
+            $photoPath = $request->file('photo')->store('candidates_photos', 'public');
         }
 
-        // Create or update the candidate
-        try {
-            if ($candidateId) {
-                // Update existing candidate
-                $candidate = Candidate::findOrFail($candidateId);
-                $candidate->update([
-                    'name' => $request->input('name'),
-                    'party' => $request->input('party'),
-                    'photo' => $photoPath ? $photoPath : $candidate->photo,
-                ]);
-            } else {
-                // Create a new candidate
-                $candidate = Candidate::create([
-                    'position_id' => $positionId,
-                    'name' => $request->input('name'),
-                    'party' => $request->input('party'),
-                    'photo' => $photoPath,
-                ]);
-            }
+        Candidate::create([
+            'name' => $request->name,
+            'party' => $request->party,
+            'position_id' => $request->position_id,
+            'photo' => $photoPath,
+        ]);
 
-            return response()->json(['message' => 'Candidate created/updated successfully.', 'candidate' => $candidate], 201);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'An error occurred while processing the request.'], 500);
-        }
+        return redirect()->route('candidates.index')->with('success', 'Candidate created successfully.');
     }
 
-    /**
-     * Delete a candidate.
-     *
-     * @param  int  $positionId
-     * @param  int  $candidateId
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($positionId, $candidateId)
+    public function edit($id)
     {
-        try {
-            // Find and delete the candidate
-            $candidate = Candidate::where('position_id', $positionId)->findOrFail($candidateId);
-            $candidate->delete();
+        $candidate = Candidate::findOrFail($id);
+        $positions = Position::all();
+        return view('candidates.edit', compact('candidate', 'positions'));
+    }
 
-            return response()->json(['message' => 'Candidate deleted successfully.'], 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json(['error' => 'Candidate not found.'], 404);
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'party' => 'required|string|max:255',
+            'position_id' => 'required|exists:positions,id',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        $candidate = Candidate::findOrFail($id);
+
+        // Handle photo update
+        $photoPath = $candidate->photo;
+        if ($request->hasFile('photo')) {
+            // Delete the old photo if exists
+            if ($photoPath && Storage::exists('public/' . $photoPath)) {
+                Storage::delete('public/' . $photoPath);
+            }
+
+            // Store the new photo
+            $photoPath = $request->file('photo')->store('candidates_photos', 'public');
         }
+
+        $candidate->update([
+            'name' => $request->name,
+            'party' => $request->party,
+            'position_id' => $request->position_id,
+            'photo' => $photoPath,
+        ]);
+
+        return redirect()->route('candidates.index')->with('success', 'Candidate updated successfully.');
+    }
+
+    public function destroy($id)
+    {
+        $candidate = Candidate::findOrFail($id);
+
+        // Delete the photo if exists
+        if ($candidate->photo && Storage::exists('public/' . $candidate->photo)) {
+            Storage::delete('public/' . $candidate->photo);
+        }
+
+        $candidate->delete();
+
+        return redirect()->route('candidates.index')->with('success', 'Candidate deleted successfully.');
     }
 }

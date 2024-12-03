@@ -4,7 +4,9 @@ import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'r
 import axios from 'axios';
 
 export default function ManageCandidates({ electionId, flash }) {
-    const [candidateName, setCandidateName] = useState('');
+    const [name, setName] = useState('');
+    const [party, setParty] = useState('');
+    const [photo, setPhoto] = useState(null);
     const [positionId, setPositionId] = useState('');
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(flash?.success || null);
@@ -51,38 +53,41 @@ export default function ManageCandidates({ electionId, flash }) {
         }
 
         const finalElectionId = electionId || storedElectionId;
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('party', party);
+        if (photo) {
+            formData.append('photo', photo);
+        }
+        formData.append('position_id', positionId);
 
         try {
             let response;
             if (isEditing) {
                 // Update the candidate
-                response = await axios.put(`/candidates/${finalElectionId}/${editCandidateId}`, {
-                    name: candidateName,
-                    position_id: positionId,
-                });
+                response = await axios.put(`/candidates/${finalElectionId}/${editCandidateId}`, formData);
                 setSuccess('Candidate updated successfully');
                 setIsEditing(false);
                 setEditCandidateId(null);
             } else {
                 // Create a new candidate
-                response = await axios.post(`/candidates/${finalElectionId}`, {
-                    name: candidateName,
-                    position_id: positionId,
-                });
+                response = await axios.post(`/candidates/${finalElectionId}`, formData);
                 setSuccess('Candidate created successfully');
             }
 
             // Reset form fields
-            setCandidateName('');
+            setName('');
+            setParty('');
+            setPhoto(null);
             setPositionId('');
             setCandidatesData((prev) =>
                 isEditing
                     ? prev.map((candidate) =>
                           candidate.id === editCandidateId
-                              ? { ...candidate, name: candidateName, position_id: positionId }
+                              ? { ...candidate, name, party, position_id: positionId, photo: response.data.photo }
                               : candidate
                       )
-                    : [...prev, { id: response.data.id, name: candidateName, position_id: positionId }]
+                    : [...prev, { id: response.data.id, name, party, position_id: positionId, photo: response.data.photo }]
             );
         } catch (error) {
             console.error('Error creating or updating candidate:', error);
@@ -93,7 +98,8 @@ export default function ManageCandidates({ electionId, flash }) {
     const handleEdit = (candidate) => {
         setIsEditing(true);
         setEditCandidateId(candidate.id);
-        setCandidateName(candidate.name);
+        setName(candidate.name);
+        setParty(candidate.party);
         setPositionId(candidate.position_id);
     };
 
@@ -188,26 +194,50 @@ export default function ManageCandidates({ electionId, flash }) {
                             )}
 
                             <div className="mt-6">
-                                <form onSubmit={handleCreateOrUpdateCandidate}>
+                                <form onSubmit={handleCreateOrUpdateCandidate} encType="multipart/form-data">
                                     <div className="mb-4">
-                                        <label htmlFor="candidateName" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                                             Candidate Name
                                         </label>
                                         <input
                                             type="text"
-                                            id="candidateName"
+                                            id="name"
                                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                            value={candidateName}
-                                            onChange={(e) => setCandidateName(e.target.value)}
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
                                             required
                                         />
                                     </div>
                                     <div className="mb-4">
-                                        <label htmlFor="positionId" className="block text-sm font-medium text-gray-700">
+                                        <label htmlFor="party" className="block text-sm font-medium text-gray-700">
+                                            Political Party
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="party"
+                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                            value={party}
+                                            onChange={(e) => setParty(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-4">
+                                        <label htmlFor="photo" className="block text-sm font-medium text-gray-700">
+                                            Candidate Photo
+                                        </label>
+                                        <input
+                                            type="file"
+                                            id="photo"
+                                            className="mt-1 block w-full text-sm text-gray-700 border border-gray-300 rounded-md shadow-sm"
+                                            onChange={(e) => setPhoto(e.target.files[0])}
+                                        />
+                                    </div>
+                                    <div className="mb-4">
+                                        <label htmlFor="position_id" className="block text-sm font-medium text-gray-700">
                                             Position
                                         </label>
                                         <select
-                                            id="positionId"
+                                            id="position_id"
                                             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                                             value={positionId}
                                             onChange={(e) => setPositionId(e.target.value)}
@@ -223,44 +253,70 @@ export default function ManageCandidates({ electionId, flash }) {
                                     </div>
                                     <button
                                         type="submit"
-                                        className="w-full bg-green-600 text-white px-6 py-2 rounded-md shadow-sm hover:bg-green-700 focus:outline-none"
+                                        className="mt-4 px-6 py-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600"
                                     >
                                         {isEditing ? 'Update Candidate' : 'Create Candidate'}
                                     </button>
                                 </form>
                             </div>
 
-                            {/* Candidates List */}
                             <div className="mt-8">
-                                <h4 className="text-xl font-medium text-gray-800">Candidates List</h4>
-                                <ul className="space-y-4 mt-4">
-                                    {loading ? (
-                                        <li>Loading candidates...</li>
-                                    ) : (
-                                        candidatesData.map((candidate) => (
-                                            <li key={candidate.id} className="flex justify-between items-center py-3 border-b">
-                                                <div>
-                                                    <h5 className="text-lg font-medium">{candidate.name}</h5>
-                                                    <p className="text-gray-500">Position: {candidate.position.name}</p>
-                                                </div>
-                                                <div className="flex space-x-2">
+                                <h4 className="text-xl font-medium text-green-600 mb-4">Candidates List</h4>
+                                <table className="min-w-full table-auto">
+                                    <thead>
+                                        <tr>
+                                            <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900">
+                                                Name
+                                            </th>
+                                            <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900">
+                                                Party
+                                            </th>
+                                            <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900">
+                                                Position
+                                            </th>
+                                            <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900">
+                                                Photo
+                                            </th>
+                                            <th className="px-4 py-2 border-b text-left text-sm font-medium text-gray-900">
+                                                Actions
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {candidatesData.map((candidate) => (
+                                            <tr key={candidate.id}>
+                                                <td className="px-4 py-2 border-b text-sm text-gray-700">{candidate.name}</td>
+                                                <td className="px-4 py-2 border-b text-sm text-gray-700">{candidate.party}</td>
+                                                <td className="px-4 py-2 border-b text-sm text-gray-700">
+                                                    {positionsData.find((position) => position.id === candidate.position_id)?.name}
+                                                </td>
+                                                <td className="px-4 py-2 border-b text-sm text-gray-700">
+                                                    {candidate.photo && (
+                                                        <img
+                                                            src={`/storage/${candidate.photo}`}
+                                                            alt={candidate.name}
+                                                            className="h-12 w-12 object-cover rounded-full"
+                                                        />
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-2 border-b text-sm text-gray-700">
                                                     <button
                                                         onClick={() => handleEdit(candidate)}
-                                                        className="bg-yellow-500 text-white px-4 py-2 rounded-lg"
+                                                        className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                                                     >
                                                         Edit
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(candidate.id)}
-                                                        className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                                                        className="ml-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
                                                     >
                                                         Delete
                                                     </button>
-                                                </div>
-                                            </li>
-                                        ))
-                                    )}
-                                </ul>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
