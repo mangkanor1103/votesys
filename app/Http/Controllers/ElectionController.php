@@ -183,4 +183,11 @@ public function showElectionPage()
         ]);
     }
 
+    // Fetch candidates based on selected position
+    public function getCandidates($positionId)
+    {
+        $candidates = Candidate::where('position_id', $positionId)->get();
+        return response()->json($candidates);
+    }
+
 }

@@ -8,10 +8,10 @@ export default function ManageCandidates({ positions, electionId, flash }) {
     const [positionsData, setPositionsData] = useState([]);  // Store positions data
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [selectedPosition, setSelectedPosition] = useState(localStorage.getItem('selectedPosition') || '');  // Persist selected position
-    const [candidates, setCandidates] = useState(JSON.parse(localStorage.getItem('candidates')) || []);  // Persist candidates
-    const [candidateName, setCandidateName] = useState(localStorage.getItem('candidateName') || '');  // Persist candidate name
-    const [candidatePlatform, setCandidatePlatform] = useState(localStorage.getItem('candidatePlatform') || '');  // Persist candidate platform
+    const [selectedPosition, setSelectedPosition] = useState('');  // Remove localStorage persistence
+    const [candidates, setCandidates] = useState([]);  // No localStorage persistence
+    const [candidateName, setCandidateName] = useState('');  // Remove localStorage persistence
+    const [candidatePlatform, setCandidatePlatform] = useState('');  // Remove localStorage persistence
     const [editingCandidate, setEditingCandidate] = useState(null); // Track candidate being edited
 
     // Fetch positions when the component loads
@@ -41,7 +41,6 @@ export default function ManageCandidates({ positions, electionId, flash }) {
         try {
             const response = await axios.get(`/candidates/${positionId}`);
             setCandidates(response.data);  // Set candidates
-            localStorage.setItem('candidates', JSON.stringify(response.data));  // Save to localStorage
         } catch (error) {
             console.error('Error fetching candidates:', error);
         }
@@ -51,7 +50,6 @@ export default function ManageCandidates({ positions, electionId, flash }) {
     const handlePositionChange = (e) => {
         const positionId = e.target.value;
         setSelectedPosition(positionId);
-        localStorage.setItem('selectedPosition', positionId);  // Persist selected position
         fetchCandidates(positionId);
     };
 
@@ -68,11 +66,8 @@ export default function ManageCandidates({ positions, electionId, flash }) {
             const response = await axios.post('/candidates', newCandidate);
             const updatedCandidates = [...candidates, response.data];
             setCandidates(updatedCandidates);
-            localStorage.setItem('candidates', JSON.stringify(updatedCandidates));
             setCandidateName('');
             setCandidatePlatform('');
-            localStorage.removeItem('candidateName');
-            localStorage.removeItem('candidatePlatform');
         } catch (error) {
             console.error('Error adding candidate:', error);
             setError('An error occurred while adding the candidate.');
@@ -85,7 +80,6 @@ export default function ManageCandidates({ positions, electionId, flash }) {
             await axios.delete(`/candidates/${candidateId}`);
             const updatedCandidates = candidates.filter(candidate => candidate.id !== candidateId);
             setCandidates(updatedCandidates);
-            localStorage.setItem('candidates', JSON.stringify(updatedCandidates));
         } catch (error) {
             console.error('Error deleting candidate:', error);
             setError('An error occurred while deleting the candidate.');
@@ -112,7 +106,6 @@ export default function ManageCandidates({ positions, electionId, flash }) {
                 candidate.id === editingCandidate.id ? response.data : candidate
             );
             setCandidates(updatedCandidates);
-            localStorage.setItem('candidates', JSON.stringify(updatedCandidates));
 
             setEditingCandidate(null);
             setCandidateName('');
@@ -123,18 +116,12 @@ export default function ManageCandidates({ positions, electionId, flash }) {
         }
     };
 
-    // Persist candidate name and platform in localStorage
-    useEffect(() => {
-        localStorage.setItem('candidateName', candidateName);
-        localStorage.setItem('candidatePlatform', candidatePlatform);
-    }, [candidateName, candidatePlatform]);
-
     // Get position name from positionsData by ID
     const getPositionName = (positionId) => {
-        // Ensure positionId is a number and compare properly
         const position = positionsData.find((pos) => pos.id === Number(positionId));
         return position ? position.name : 'Unknown Position';
     };
+
     const handleLogout = async () => {
         try {
             await post(route('logout')); // Log out the user
@@ -143,7 +130,6 @@ export default function ManageCandidates({ positions, electionId, flash }) {
             console.error("Logout failed:", error);
         }
     };
-
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
@@ -155,7 +141,6 @@ export default function ManageCandidates({ positions, electionId, flash }) {
                         <h2 className="text-3xl font-extrabold text-green-100 tracking-wide">
                             Mindoro State University Voting System
                         </h2>
-
                         <div className="flex flex-col sm:flex-row items-center gap-6 mt-4 sm:mt-0">
                             <Link
                                 href={route('subdashboard')}
@@ -230,96 +215,93 @@ export default function ManageCandidates({ positions, electionId, flash }) {
                             {/* Display selected position */}
                             {selectedPosition && (
                                 <div className="mt-8">
-                                    <h4 className="text-xl font-semibold text-green-600">Selected Position</h4>
+                                    <h4 className="text-xl font-semibold text-green-600">Candidates for {getPositionName(selectedPosition)}</h4>
+
+                                    {/* Candidate List */}
+                                    <ul className="mt-4">
+                                        {candidates.map((candidate) => (
+                                            <li key={candidate.id} className="flex justify-between items-center">
+                                                <span>{candidate.name}</span>
+                                                <span>{candidate.platform}</span>
+                                                <button
+                                                    onClick={() => handleEditCandidate(candidate)}
+                                                    className="ml-4 text-blue-600 hover:text-blue-800"
+                                                >
+                                                    <FaPen />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteCandidate(candidate.id)}
+                                                    className="ml-2 text-red-600 hover:text-red-800"
+                                                >
+                                                    <FaTrashAlt />
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            {/* Add New Candidate */}
+                            {selectedPosition && (
+                                <div className="mt-8">
+                                    <h4 className="text-xl font-semibold text-green-600">Add New Candidate</h4>
                                     <div className="mt-4">
-                                        <label className="block text-lg text-green-600">Position</label>
                                         <input
                                             type="text"
-                                            value={positionsData.find(pos => String(pos.id) === String(selectedPosition))?.name || ''}
-                                            disabled
-                                            className="w-full px-4 py-2 border border-green-300 rounded-md bg-gray-100 text-gray-500"
+                                            value={candidateName}
+                                            onChange={(e) => setCandidateName(e.target.value)}
+                                            placeholder="Enter candidate name"
+                                            className="w-full px-4 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600"
                                         />
+                                        <textarea
+                                            value={candidatePlatform}
+                                            onChange={(e) => setCandidatePlatform(e.target.value)}
+                                            placeholder="Enter candidate platform"
+                                            className="w-full mt-4 px-4 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600"
+                                        />
+                                        <button
+                                            onClick={handleAddCandidate}
+                                            className="mt-4 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                                        >
+                                            Add Candidate
+                                        </button>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Form to Add or Edit a Candidate */}
-                            <div className="mt-8">
-                                <h4 className="text-xl font-semibold text-green-600">{editingCandidate ? 'Edit' : 'Add'} Candidate</h4>
-                                <div className="mt-4">
-                                    <label className="block text-lg text-green-600">Candidate Name</label>
-                                    <input
-                                        type="text"
-                                        value={candidateName}
-                                        onChange={(e) => setCandidateName(e.target.value)}
-                                        className="w-full px-4 py-2 border border-green-300 rounded-md"
-                                    />
+                            {/* Edit candidate */}
+                            {editingCandidate && (
+                                <div className="mt-8">
+                                    <h4 className="text-xl font-semibold text-green-600">Edit Candidate</h4>
+                                    <div className="mt-4">
+                                        <input
+                                            type="text"
+                                            value={candidateName}
+                                            onChange={(e) => setCandidateName(e.target.value)}
+                                            placeholder="Enter candidate name"
+                                            className="w-full px-4 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600"
+                                        />
+                                        <textarea
+                                            value={candidatePlatform}
+                                            onChange={(e) => setCandidatePlatform(e.target.value)}
+                                            placeholder="Enter candidate platform"
+                                            className="w-full mt-4 px-4 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600"
+                                        />
+                                        <button
+                                            onClick={handleUpdateCandidate}
+                                            className="mt-4 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                                        >
+                                            Update Candidate
+                                        </button>
+                                        <button
+                                            onClick={() => setEditingCandidate(null)}
+                                            className="mt-4 ml-4 px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="mt-4">
-                                    <label className="block text-lg text-green-600">Platform</label>
-                                    <textarea
-                                        value={candidatePlatform}
-                                        onChange={(e) => setCandidatePlatform(e.target.value)}
-                                        className="w-full px-4 py-2 border border-green-300 rounded-md"
-                                    />
-                                </div>
-                                {editingCandidate ? (
-                                    <button
-                                        onClick={handleUpdateCandidate}
-                                        className="mt-6 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                                    >
-                                        Update Candidate
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={handleAddCandidate}
-                                        className="mt-6 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                                    >
-                                        Add Candidate
-                                    </button>
-                                )}
-                            </div>
-
-                            {/* Candidate Table */}
-                            <div className="mt-8">
-                                <h4 className="text-xl font-semibold text-green-600">Candidates</h4>
-                                <div className="overflow-x-auto mt-4">
-                                    <table className="min-w-full table-auto">
-                                        <thead className="bg-green-600 text-white">
-                                            <tr>
-                                                <th className="px-4 py-2">Name</th>
-                                                <th className="px-4 py-2">Position</th>
-                                                <th className="px-4 py-2">Platform</th>
-                                                <th className="px-4 py-2">Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {candidates.map((candidate) => (
-                                                <tr key={candidate.id}>
-                                                    <td className="px-4 py-2">{candidate.name}</td>
-                                                    <td className="px-4 py-2">{getPositionName(candidate.position_id)}</td>
-                                                    <td className="px-4 py-2">{candidate.platform}</td>
-                                                    <td className="px-4 py-2">
-                                                        <button
-                                                            onClick={() => handleEditCandidate(candidate)}
-                                                            className="px-4 py-2 text-white bg-yellow-500 rounded-md mr-2"
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteCandidate(candidate.id)}
-                                                            className="px-4 py-2 text-white bg-red-500 rounded-md"
-                                                        >
-                                                            Delete
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
+                            )}
                         </div>
                     </div>
                 </div>
