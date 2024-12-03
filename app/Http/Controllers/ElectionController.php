@@ -24,6 +24,8 @@ class ElectionController extends Controller
         return Inertia::render('SuperAdmin/Elections', [
             'elections' => $elections,
         ]);
+
+        
     }
     public function getPositions($electionId)
 {
@@ -175,19 +177,40 @@ public function showElectionPage()
         $candidates = Candidate::where('position_id', $positionId)->get();
         return response()->json($candidates);
     }
-    public function destroy($id)
-    {
-        try {
-            // Find and delete the election by ID
-            $election = Election::findOrFail($id);
-            $election->delete();
 
-            // Return a response or redirect to a specific page
-            return redirect()->route('election.index')->with('success', 'Election deleted successfully');
-        } catch (\Exception $e) {
-            // Handle errors if the election could not be found or deleted
-            return redirect()->route('election.index')->with('error', 'Failed to delete the election');
+    //DESTROY
+    public function destroy($id)
+{
+    $election = Election::findOrFail($id);
+    $election->delete();
+    
+    return redirect()->route('elections.index')->with('success', 'Election deleted successfully!');
+}
+
+
+
+    public function update($id, Request $request)
+    {
+        // Find the election by ID
+        $election = Election::find($id);
+        if (!$election) {
+            return redirect()->back()->with('error', 'Election not found');
         }
+
+        // Validate the request
+        $validated = $request->validate([
+            'election_name' => 'required|string|max:255',
+            'election_date' => 'required|date',
+        ]);
+
+        // Update the election with new data
+        $election->update([
+            'election_name' => $validated['election_name'],
+            'election_date' => $validated['election_date'],
+        ]);
+
+        // Optionally, you can return a success message or redirect back
+        return redirect()->route('elections.index')->with('success', 'Election updated successfully');
     }
 
 }

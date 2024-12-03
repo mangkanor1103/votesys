@@ -1,5 +1,5 @@
-import React from "react";
-import { FaVoteYea, FaTrash } from 'react-icons/fa'; // Import trash icon for delete
+import React, { useState } from "react";
+import { FaVoteYea, FaEdit, FaTrash } from 'react-icons/fa'; 
 import InputError from "@/Components/InputError";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { Head, useForm } from "@inertiajs/react";
@@ -12,24 +12,85 @@ export default function Elections({ auth, elections }) {
         election_date: '',
     });
 
+    const [editingElection, setEditingElection] = useState(null);
+    const [electionsList, setElectionsList] = useState(elections);
+
+    // Handle Submit (Create or Update Election)
     const submit = (e) => {
-        e.preventDefault();
-        post(route('election.store'), {
-            onSuccess: () => reset(),
+        e.preventDefault(); // Prevent page refresh
+
+        if (editingElection) {
+            handleUpdate();
+        } else {
+            // Send post request to store new election
+            post(route('election.store'), {
+                data: { election_name: data.election_name, election_date: data.election_date },
+                onSuccess: (response) => {
+                    console.log("Response after creating election:", response); // Debug log to check the response
+
+                    if (response.props && response.props.election) {
+                        const newElection = response.props.election;
+                        console.log("New election object:", newElection); // Debug log for new election
+
+                        // Update elections list immediately with the new election
+                        setElectionsList(prev => {
+                            console.log("Previous elections list before adding new one:", prev); // Debug log
+                            return [...prev, newElection];
+                        });
+                    } else {
+                        console.error('New election not returned in response.');
+                    }
+                    reset(); // Reset form data after successful submission
+                },
+                onError: (error) => {
+                    console.error('Error:', error); // Optional: handle any errors from the server
+                },
+            });
+        }
+    };
+
+    // Handle Edit Election
+    const handleEdit = (election) => {
+        setEditingElection(election.id);
+        setData({
+            election_name: election.election_name,
+            election_date: election.election_date,
         });
     };
 
-// Handle Delete Election
-const handleDelete = (id) => {
-    if (confirm("Are you sure you want to delete this election?")) {
-        // Use Inertia.delete instead of post for DELETE requests
-        Inertia.delete(route('election.delete', id), {
-            onSuccess: () => {
-                // Optional: Handle the success, like refreshing the list or showing a success message
-            }
+    // Handle Update Election
+    const handleUpdate = () => {
+        post(route('election.update', editingElection), {
+            data: { election_name: data.election_name, election_date: data.election_date },
+            onSuccess: (response) => {
+                // Update the election in the local state without refreshing the page
+                setElectionsList(prev =>
+                    prev.map(election =>
+                        election.id === editingElection
+                            ? { ...election, election_name: data.election_name, election_date: data.election_date }
+                            : election
+                    )
+                );
+                setEditingElection(null);
+                reset();
+            },
         });
-    }
-};
+    };
+
+    // Handle Delete Election
+    const handleDelete = (electionId) => {
+        if (window.confirm("Are you sure you want to delete this election?")) {
+            // Optimistic UI update: Remove election from the list immediately
+            setElectionsList(prevElections => prevElections.filter(election => election.id !== electionId));
+
+            Inertia.delete(route('election.destroy', electionId), {
+                onError: () => {
+                    // If deletion fails, add the election back to the list
+                    setElectionsList(prevElections => [...prevElections, prevElections.find(election => election.id === electionId)]);
+                },
+            });
+        }
+    };
 
     return (
         <AuthenticatedLayout>
@@ -45,6 +106,7 @@ const handleDelete = (id) => {
                             placeholder="Election Name"
                             className="block w-full p-4 bg-white border border-green-400 focus:border-green-600 focus:ring focus:ring-green-200 focus:ring-opacity-50 rounded-lg shadow-md text-green-900 transition-transform duration-300 ease-in-out transform hover:scale-105"
                             onChange={e => setData('election_name', e.target.value)}
+                            disabled={editingElection !== null} // Disable input if editing
                         />
                         <InputError message={errors.election_name} className="mt-2 text-red-600" />
                     </div>
@@ -55,16 +117,24 @@ const handleDelete = (id) => {
                             value={data.election_date}
                             className="block w-full p-4 bg-white border border-green-400 focus:border-green-600 focus:ring focus:ring-green-200 focus:ring-opacity-50 rounded-lg shadow-md text-green-900 transition-transform duration-300 ease-in-out transform hover:scale-105"
                             onChange={e => setData('election_date', e.target.value)}
+                            disabled={editingElection !== null} // Disable input if editing
                         />
                         <InputError message={errors.election_date} className="mt-2 text-red-600" />
                     </div>
 
                     <div className="text-center">
                         <PrimaryButton
+                            type="submit" // Ensure form submission is triggered
                             className="mt-4 px-8 py-3 bg-green-700 text-white text-lg font-semibold flex items-center justify-center gap-2 hover:bg-green-800 transition-transform duration-300 ease-in-out transform hover:scale-110 rounded-lg shadow-lg disabled:bg-green-300"
                             disabled={processing}
                         >
-                            <FaVoteYea className="text-2xl" /> Create Election
+                            {editingElection ? (
+                                <span>Update Election</span> // Show Update when editing
+                            ) : (
+                                <>
+                                    <FaVoteYea className="text-2xl" /> Create Election
+                                </>
+                            )}
                         </PrimaryButton>
                     </div>
                 </form>
@@ -81,18 +151,46 @@ const handleDelete = (id) => {
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-green-100">
-                            {elections.map((election) => (
+                            {electionsList.map((election) => (
                                 <tr key={election.id} className="hover:bg-green-50">
-                                    <td className="px-6 py-4 text-sm text-green-900">{election.election_name}</td>
-                                    <td className="px-6 py-4 text-sm text-green-900">{election.election_date}</td>
-                                    <td className="px-6 py-4 text-sm text-green-900">{election.election_code}</td>
                                     <td className="px-6 py-4 text-sm text-green-900">
-                                        <button
-                                            onClick={() => handleDelete(election.id)}
-                                            className="text-red-600 hover:text-red-800"
-                                        >
-                                            <FaTrash className="inline mr-2" /> Delete
-                                        </button>
+                                        {editingElection === election.id ? (
+                                            <input
+                                                type="text"
+                                                value={data.election_name}
+                                                onChange={e => setData('election_name', e.target.value)}
+                                                className="block w-full p-2 bg-white border border-green-400 focus:border-green-600 focus:ring focus:ring-green-200 focus:ring-opacity-50 rounded-lg"
+                                            />
+                                        ) : (
+                                            election.election_name
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 text-sm text-green-900">{election.election_date}</td>
+                                    <td className="px-6 py-4 text-sm text-green-900">{election.election_code}</td> {/* Displaying election code */}
+                                    <td className="px-6 py-4 text-sm text-green-900">
+                                        {editingElection === election.id ? (
+                                            <button
+                                                type="submit" // Submit the form to update election
+                                                className="text-green-600 hover:text-green-800"
+                                            >
+                                                <FaEdit className="inline mr-2" /> Update
+                                            </button>
+                                        ) : (
+                                            <>
+                                                <button
+                                                    onClick={() => handleEdit(election)}
+                                                    className="text-blue-600 hover:text-blue-800"
+                                                >
+                                                    <FaEdit className="inline mr-2" /> Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(election.id)}
+                                                    className="ml-4 text-red-600 hover:text-red-800"
+                                                >
+                                                    <FaTrash className="inline mr-2" /> Delete
+                                                </button>
+                                            </>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

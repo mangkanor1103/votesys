@@ -15,6 +15,11 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 
+Route::delete('/elections/{election}', [ElectionController::class, 'destroy'])->name('election.destroy');
+
+
+//UPDATE AN ELECTION
+Route::post('/election/update/{id}', [ElectionController::class, 'update'])->name('election.update');
 
 Route::post('/voter/login', [VoterController::class, 'login'])->name('voter.login');
 // Routes/web.php
