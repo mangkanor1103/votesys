@@ -15,6 +15,18 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 
+// Store a new candidate
+Route::post('/candidates', [CandidateController::class, 'store']);
+
+// Get candidates for a position and election
+Route::get('/candidates/{positionId}', [CandidateController::class, 'index']);
+
+// Update an existing candidate
+Route::put('/candidates/{id}', [CandidateController::class, 'update']);  // PUT for updating
+
+// Delete a candidate
+Route::delete('/candidates/{id}', [CandidateController::class, 'destroy']);
+
 Route::delete('/voters/{electionId}/clear', [VoterController::class, 'clear']);
 
 Route::post('/voters/generate', [VoterController::class, 'generate']);

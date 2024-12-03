@@ -1,10 +1,8 @@
 <?php
-// app/Http/Controllers/CandidateController.php
+
 namespace App\Http\Controllers;
 
 use App\Models\Candidate;
-use App\Models\Position;
-use App\Models\Election;
 use Illuminate\Http\Request;
 
 class CandidateController extends Controller
@@ -12,11 +10,8 @@ class CandidateController extends Controller
     // Display the candidates for a specific position and election
     public function index($electionId, $positionId)
     {
-        $position = Position::findOrFail($positionId);
-        $election = Election::findOrFail($electionId);
         $candidates = Candidate::where('position_id', $positionId)->where('election_id', $electionId)->get();
-
-        return response()->json($candidates); // Return candidates as JSON to the frontend
+        return response()->json($candidates);
     }
 
     // Store a new candidate
@@ -36,6 +31,34 @@ class CandidateController extends Controller
             'platform' => $request->platform,
         ]);
 
-        return response()->json($candidate, 201); // Return the created candidate as JSON
+        return response()->json($candidate, 201);
+    }
+
+    // Update an existing candidate
+    public function update(Request $request, $id)
+    {
+        $candidate = Candidate::findOrFail($id);
+
+        // Validate the incoming request
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'platform' => 'required|string|max:1000',
+        ]);
+
+        // Update candidate attributes
+        $candidate->update([
+            'name' => $request->name,
+            'platform' => $request->platform,
+        ]);
+
+        return response()->json($candidate);  // Return the updated candidate
+    }
+
+    // Delete a candidate
+    public function destroy($id)
+    {
+        $candidate = Candidate::findOrFail($id);
+        $candidate->delete();
+        return response()->json(['message' => 'Candidate deleted successfully.']);
     }
 }
