@@ -14,14 +14,12 @@ class CreateCandidatesTable extends Migration
     public function up()
     {
         Schema::create('candidates', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');  // Candidate's name
-            $table->unsignedBigInteger('position_id');  // Foreign key for position
-            $table->string('photo_url')->nullable();  // Optional field for candidate's photo URL
-            $table->timestamps();
-
-            // Define foreign key constraints
-            $table->foreign('position_id')->references('id')->on('positions')->onDelete('cascade');
+            $table->id(); // Primary key
+            $table->foreignId('position_id')->constrained()->onDelete('cascade'); // Foreign key referencing the 'positions' table
+            $table->string('name'); // Candidate name
+            $table->string('party'); // Political party
+            $table->string('photo')->nullable(); // Path to candidate's photo (nullable)
+            $table->timestamps(); // Created at and updated at timestamps
         });
     }
 
