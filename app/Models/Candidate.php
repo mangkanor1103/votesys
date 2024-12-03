@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -8,12 +9,22 @@ class Candidate extends Model
 {
     use HasFactory;
 
-    // Fillable attributes
-    protected $fillable = ['name', 'position_id', 'photo'];
+    protected $fillable = [
+        'position_id',
+        'name',
+        'party',
+        'photo',
+    ];
 
-    // Relationship: A candidate belongs to one position
+    /**
+     * Get the position that the candidate belongs to.
+     */
     public function position()
     {
         return $this->belongsTo(Position::class);
+    }
+    public function election()
+    {
+        return $this->belongsTo(Election::class);
     }
 }

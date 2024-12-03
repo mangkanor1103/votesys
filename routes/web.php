@@ -8,17 +8,21 @@ use App\Http\Controllers\ShareController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\VoterController;
+use App\Http\Controllers\SubAdminController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 
-// In routes/api.php or routes/web.php
-Route::delete('/voters/{electionId}/clear', [VoterController::class, 'clear']);
+// Fetch all voters (voter codes) for a given election
+// Route to fetch voters for a specific election
+Route::get('/voters/{electionId}', [VoterController::class, 'index'])->name('voters.index');
+Route::get('/voters/{electionId}', [VoterController::class, 'getVoterCodes']);
 
-Route::post('/voters/generate', [VoterController::class, 'generate']);
-Route::get('/voters/{electionId}', [VoterController::class, 'fetch']);
+// Route to generate voter codes for an election
+Route::post('/voters/generate', [VoterController::class, 'generateVoterCodes'])->name('voters.generate');
+
 // Fetch positions for a specific election
 Route::get('/positions/{electionId}', [PositionController::class, 'index'])->name('positions.index');
 
@@ -29,24 +33,21 @@ Route::put('/positions/{electionId}/{positionId}', [PositionController::class, '
 // Delete a position
 Route::delete('/positions/{electionId}/{positionId}', [PositionController::class, 'destroy'])->name('positions.destroy');
 
+// routes/web.php
 
-Route::get('/elections/{electionId}/positions', [CandidateController::class, 'getPositions']);
-Route::get('/elections/{electionId}/manage-candidates', [CandidateController::class, 'index']);
-// In routes/web.php or routes/api.php
-Route::post('/candidates/{electionId}', [CandidateController::class, 'store']);
+// Display candidates for a specific position
+Route::get('positions/{positionId}/candidates', [CandidateController::class, 'index']);
 
+// Store a new candidate or update an existing one
+Route::post('positions/{positionId}/candidates', [CandidateController::class, 'storeOrUpdate']); // For creating a new candidate
+Route::put('positions/{positionId}/candidates/{candidateId}', [CandidateController::class, 'storeOrUpdate']); // For updating an existing candidate
 
-Route::middleware('auth')->group(function () {
-    Route::get('/candidates/{electionId}', [CandidateController::class, 'index'])->name('manage-candidates');
-    Route::post('/candidates/{electionId}', [CandidateController::class, 'store']);
-});
+// Delete a candidate
+Route::delete('positions/{positionId}/candidates/{candidateId}', [CandidateController::class, 'destroy']);
+
 
 Route::get('/election', [ElectionController::class, 'showElectionPage']);
 
-Route::get('/api/candidates', [CandidateController::class, 'index']);
-Route::post('/api/candidates', [CandidateController::class, 'store']);
-Route::delete('/api/candidates/{id}', [CandidateController::class, 'destroy']);
-//Route::post('/voters/generate', [VoterController::class, 'generateVoterCodes']);
 
 Route::get('/users', function () {
     return Inertia::render('User/Users');
