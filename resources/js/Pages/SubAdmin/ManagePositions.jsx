@@ -105,11 +105,15 @@ export default function ManagePositions({ positions, electionId, flash }) {
         }
     };
 
-    const handleLogout = () => {
-        axios.post('/logout').then(() => {
-            window.location.href = '/login';
-        });
+    const handleLogout = async () => {
+        try {
+            await post(route('logout')); // Log out the user
+            window.location.href = '/'; // Redirect to Welcome.jsx (assuming '/' is the route for Welcome.jsx)
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     };
+
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
