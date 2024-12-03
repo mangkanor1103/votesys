@@ -30,11 +30,14 @@ Route::put('/positions/{electionId}/{positionId}', [PositionController::class, '
 // Delete a position
 Route::delete('/positions/{electionId}/{positionId}', [PositionController::class, 'destroy'])->name('positions.destroy');
 
-Route::get('candidates', [CandidateController::class, 'index'])->name('candidates.index');
-Route::post('candidates', [CandidateController::class, 'store'])->name('candidates.store');
-Route::get('candidates/{id}/edit', [CandidateController::class, 'edit'])->name('candidates.edit');
-Route::put('candidates/{id}', [CandidateController::class, 'update'])->name('candidates.update');
-Route::delete('candidates/{id}', [CandidateController::class, 'destroy'])->name('candidates.destroy');
+// routes/web.php
+
+
+// Show the form for displaying candidates for a specific election and position
+Route::get('/candidates/{electionId}/{positionId}', [CandidateController::class, 'index'])->name('candidates.index');
+
+// Add a new candidate (POST)
+Route::post('/candidates', [CandidateController::class, 'store'])->name('candidates.store');
 
 
 Route::get('/election', [ElectionController::class, 'showElectionPage']);

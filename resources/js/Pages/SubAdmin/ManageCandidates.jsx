@@ -9,6 +9,8 @@ export default function ManagePositions({ positions, electionId, flash }) {
     const [error, setError] = useState(null);
     const [selectedPosition, setSelectedPosition] = useState('');
     const [candidates, setCandidates] = useState([]);
+    const [candidateName, setCandidateName] = useState(''); // For candidate name
+    const [candidatePlatform, setCandidatePlatform] = useState(''); // For candidate platform
 
     useEffect(() => {
         const storedElectionId = localStorage.getItem('election_id');
@@ -44,6 +46,30 @@ export default function ManagePositions({ positions, electionId, flash }) {
         const positionId = e.target.value;
         setSelectedPosition(positionId);
         fetchCandidates(positionId);
+    };
+
+    const handleAddCandidate = async () => {
+        try {
+            const newCandidate = {
+                election_id: electionId || localStorage.getItem('election_id'),  // Ensure election ID is passed correctly
+                position_id: selectedPosition,
+                name: candidateName,
+                platform: candidatePlatform,
+            };
+
+            // Send POST request to store the candidate
+            const response = await axios.post('/candidates', newCandidate);
+
+            // Add the new candidate to the list (assuming successful response)
+            setCandidates([...candidates, response.data]);
+
+            // Clear the input fields
+            setCandidateName('');
+            setCandidatePlatform('');
+        } catch (error) {
+            console.error('Error adding candidate:', error);
+            setError('An error occurred while adding the candidate.');
+        }
     };
 
     return (
@@ -152,16 +178,45 @@ export default function ManagePositions({ positions, electionId, flash }) {
                                             className="w-full px-4 py-2 border border-green-300 rounded-md bg-gray-100 text-gray-500"
                                         />
                                     </div>
+
+                                    {/* Candidate Name and Platform */}
+                                    <div className="mt-8">
+                                        <h4 className="text-xl font-semibold text-green-600">Add Candidate</h4>
+                                        <div className="mt-4">
+                                            <label className="block text-lg text-green-600">Candidate Name</label>
+                                            <input
+                                                type="text"
+                                                value={candidateName}
+                                                onChange={(e) => setCandidateName(e.target.value)}
+                                                className="w-full px-4 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600"
+                                            />
+                                        </div>
+                                        <div className="mt-4">
+                                            <label className="block text-lg text-green-600">Platform</label>
+                                            <textarea
+                                                value={candidatePlatform}
+                                                onChange={(e) => setCandidatePlatform(e.target.value)}
+                                                className="w-full px-4 py-2 border border-green-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-600"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleAddCandidate}
+                                            className="mt-4 bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-700 transition duration-300"
+                                        >
+                                            Add Candidate
+                                        </button>
+                                    </div>
                                 </div>
                             )}
 
+                            {/* Display Candidates */}
                             {candidates.length > 0 && (
                                 <div className="mt-8">
-                                    <h4 className="text-xl font-semibold text-green-600">Candidates for {positionsData.find(pos => String(pos.id) === String(selectedPosition))?.name}</h4>
+                                    <h4 className="text-xl font-semibold text-green-600">Candidates</h4>
                                     <ul className="mt-4">
                                         {candidates.map((candidate) => (
-                                            <li key={candidate.id} className="flex items-center justify-between py-2">
-                                                <span>{candidate.name}</span>
+                                            <li key={candidate.id} className="py-2 border-b border-green-200">
+                                                {candidate.name} - Platform: {candidate.platform}
                                             </li>
                                         ))}
                                     </ul>

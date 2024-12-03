@@ -1,5 +1,5 @@
 <?php
-
+// app/Models/Candidate.php
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,14 +10,19 @@ class Candidate extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'party',
+        'election_id',
         'position_id',
-        'photo',
+        'name',
+        'platform',
     ];
 
     public function position()
     {
         return $this->belongsTo(Position::class);
+    }
+
+    public function election()
+    {
+        return $this->belongsTo(Election::class);
     }
 }
