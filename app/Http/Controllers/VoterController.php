@@ -81,11 +81,34 @@ class VoterController extends Controller
         }
 
         // If voter code is valid, redirect to the voter dashboard
-        return redirect()->route('voter.dashboard', ['voter' => $voter->id]);
+        return redirect()->route('voter.dashboard', ['id' => $voter->id]);
     }
 
     /**
      * Show the voters dashboard.
      */
+    public function dashboard($id, Request $request)
+    {
+        // Fetch the voter based on the voter ID
+        $voter = Voter::findOrFail($id);  // Find the voter by ID, or fail with a 404
+
+        // Fetch the election related to the voter
+        $election = Election::findOrFail($voter->election_id);  // Use the election_id from the voter record
+
+        // Now, you have the voter code and election name
+        $voterCode = $voter->voter_code;
+        $electionName = $election->election_name;  // Assuming `description` is the name of the election
+
+        // Return the data to the React component via Inertia
+        return inertia('Voter/Dashboard', [
+            'voterId' => $voter->id,
+            'voterCode' => $voterCode,
+            'electionId' => $election->id,
+            'electionName' => $electionName,
+
+        ]);
+    }
+
+
 
 }

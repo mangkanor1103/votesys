@@ -30,8 +30,9 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
         post(route('voter.login'), {
             data: { voter_code: data.voter_code },
             onSuccess: () => {
-                // Redirect to voter dashboard after successful login
-                window.location.href = "/voter/dashboard?election_id=${id}&voter_code=${code}&election_name=${name}&election_date=${date}`;
+                // Assuming 'id', 'name', and 'date' are available in the scope
+                const { id, name, date } = yourElectionData; // Replace 'yourElectionData' with the actual object holding these values
+                window.location.href = `/voter/dashboard/${id}?election_name=${name}&election_date=${date}`;
             },
             onError: (errors) => {
                 // Handle error, display error message if any
@@ -39,6 +40,8 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
             },
         });
     };
+
+
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">

@@ -153,20 +153,6 @@ public function showDashboard($id)
     }
 
 
-    public function destroy($id)
-{
-    $election = Election::find($id);
-
-    if (!$election) {
-        return redirect()->route('elections.index')->with('error', 'Election not found');
-    }
-
-    $election->delete();
-
-    return redirect()->route('elections.index')->with('success', 'Election deleted successfully');
-
-
-}
 
 public function showElectionPage()
     {
@@ -188,6 +174,20 @@ public function showElectionPage()
     {
         $candidates = Candidate::where('position_id', $positionId)->get();
         return response()->json($candidates);
+    }
+    public function destroy($id)
+    {
+        try {
+            // Find and delete the election by ID
+            $election = Election::findOrFail($id);
+            $election->delete();
+
+            // Return a response or redirect to a specific page
+            return redirect()->route('election.index')->with('success', 'Election deleted successfully');
+        } catch (\Exception $e) {
+            // Handle errors if the election could not be found or deleted
+            return redirect()->route('election.index')->with('error', 'Failed to delete the election');
+        }
     }
 
 }
