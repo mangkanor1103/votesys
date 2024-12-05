@@ -78,6 +78,9 @@ Route::get('/users', function () {
 
 
 Route::post('/upload-candidate-photo', [CandidateController::class, 'uploadPhoto']);
+use App\Http\Controllers\VoteController;
+
+Route::post('/vote', [VoteController::class, 'store'])->name('vote.store');
 
 
 Route::post('/logout', function () {

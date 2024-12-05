@@ -1,15 +1,26 @@
 import { Head } from '@inertiajs/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 
 const VoterDashboard = ({ voterId, voterCode, electionId, electionName, positions }) => {
-    // Logout handler
-    const handleLogout = () => {
-        Inertia.post(route('logout'), {
-            onSuccess: () => {
-                Inertia.get(route('login'));
-            },
-        });
+    const [selectedVotes, setSelectedVotes] = useState({}); // Track selected candidates for each position
+
+    const handleVoteChange = (positionId, candidateId) => {
+        setSelectedVotes((prev) => ({
+            ...prev,
+            [positionId]: candidateId,
+        }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+
+        const votes = Object.entries(selectedVotes).map(([positionId, candidateId]) => ({
+            position_id: positionId,
+            candidate_id: candidateId,
+        }));
+
+        Inertia.post(route('vote.store'), { voter_id: voterId, votes });
     };
 
     return (
@@ -24,45 +35,53 @@ const VoterDashboard = ({ voterId, voterCode, electionId, electionName, position
                                 Welcome, Voter {voterId}
                             </h3>
                             <p className="text-lg mb-2"><strong>Voter ID:</strong> {voterId}</p>
-                            <p className="text-lg mb-2"><strong>Voter Code:</strong> {voterCode}</p>
-                            <p className="text-lg mb-2"><strong>Election ID:</strong> {electionId}</p>
                             <p className="text-lg mb-2"><strong>Election Name:</strong> {electionName}</p>
 
-                            {/* Display Positions */}
-                            <div className="mt-6">
-                                <h4 className="text-xl font-semibold mb-3">Available Positions and Candidates:</h4>
-                                <ul className="list-disc pl-5 space-y-4">
+                            {/* Voting Form */}
+                            <form onSubmit={handleSubmit}>
+                                <div className="mt-6">
+                                    <h4 className="text-xl font-semibold mb-3">Vote for Candidates:</h4>
                                     {positions && positions.length > 0 ? (
                                         positions.map((position) => (
-                                            <li key={position.id}>
-                                                <strong>{position.name}</strong>
-                                                {position.maxVotes && ` (Max Votes: ${position.maxVotes})`}
-                                                <ul className="list-disc pl-5 mt-2 space-y-2">
+                                            <div key={position.id} className="mb-6">
+                                                <h5 className="text-lg font-semibold">{position.name}</h5>
+                                                <ul className="list-none space-y-2 mt-2">
                                                     {position.candidates && position.candidates.length > 0 ? (
                                                         position.candidates.map((candidate) => (
                                                             <li key={candidate.id}>
-                                                                <strong>{candidate.name}</strong>: {candidate.platform}
+                                                                <label className="flex items-center">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name={`position_${position.id}`}
+                                                                        value={candidate.id}
+                                                                        checked={selectedVotes[position.id] === candidate.id}
+                                                                        onChange={() => handleVoteChange(position.id, candidate.id)}
+                                                                        className="mr-2"
+                                                                    />
+                                                                    <span>
+                                                                        <strong>{candidate.name}</strong>: {candidate.platform}
+                                                                    </span>
+                                                                </label>
                                                             </li>
                                                         ))
                                                     ) : (
                                                         <li>No candidates for this position.</li>
                                                     )}
                                                 </ul>
-                                            </li>
+                                            </div>
                                         ))
                                     ) : (
-                                        <li>No positions available.</li>
+                                        <p>No positions available.</p>
                                     )}
-                                </ul>
-                            </div>
+                                </div>
 
-                            {/* Logout Button */}
-                            <button
-                                onClick={handleLogout}
-                                className="mt-4 py-2 px-4 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600"
-                            >
-                                Logout
-                            </button>
+                                <button
+                                    type="submit"
+                                    className="mt-4 py-2 px-4 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600"
+                                >
+                                    Submit Votes
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>

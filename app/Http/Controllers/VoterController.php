@@ -10,6 +10,8 @@ use Inertia\Inertia;
 
 class VoterController extends Controller
 {
+
+
     /**
      * Generate voter codes for an election.
      */
