@@ -77,6 +77,7 @@ Route::get('/users', function () {
 });
 
 
+Route::post('/upload-candidate-photo', [CandidateController::class, 'uploadPhoto']);
 
 
 Route::post('/logout', function () {
