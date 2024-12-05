@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\ElectionResultController;
 
 Route::delete('/elections/{election}', [ElectionController::class, 'destroy'])->name('election.destroy');
 
@@ -81,7 +82,7 @@ Route::post('/upload-candidate-photo', [CandidateController::class, 'uploadPhoto
 use App\Http\Controllers\VoteController;
 
 Route::post('/vote', [VoteController::class, 'store'])->name('vote.store');
-
+Route::get('/election/{electionId}/results', [ElectionResultController::class, 'index'])->name('election.results');
 
 Route::post('/logout', function () {
     Auth::logout(); // Log the user out
