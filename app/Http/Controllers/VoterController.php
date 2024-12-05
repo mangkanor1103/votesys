@@ -90,30 +90,34 @@ class VoterController extends Controller
     public function dashboard($id, Request $request)
     {
         // Fetch the voter based on the voter ID
-        $voter = Voter::findOrFail($id);  // Find the voter by ID or fail with a 404
+        $voter = Voter::findOrFail($id);
 
         // Fetch the election related to the voter
-        $election = Election::findOrFail($voter->election_id);  // Use the election_id from the voter record
+        $election = Election::findOrFail($voter->election_id);
 
-        // Fetch all positions associated with the election
-        $positions = $election->positions;  // Assuming a relationship exists between Election and Position
-
-        // Format the positions to include only the details needed
-        $formattedPositions = $positions->map(function ($position) {
+        // Fetch positions for the election
+        $positions = $election->positions()->with('candidates')->get()->map(function ($position) {
             return [
                 'id' => $position->id,
                 'name' => $position->name,
                 'maxVotes' => $position->max_votes,
+                'candidates' => $position->candidates->map(function ($candidate) {
+                    return [
+                        'id' => $candidate->id,
+                        'name' => $candidate->name,
+                        'platform' => $candidate->platform,
+                    ];
+                }),
             ];
         });
 
-        // Pass the data to the React component via Inertia
+        // Pass data to Inertia
         return inertia('Voter/Dashboard', [
             'voterId' => $voter->id,
             'voterCode' => $voter->voter_code,
             'electionId' => $election->id,
             'electionName' => $election->election_name,
-            'positions' => $formattedPositions, // Add positions to the data passed
+            'positions' => $positions,
         ]);
     }
 
