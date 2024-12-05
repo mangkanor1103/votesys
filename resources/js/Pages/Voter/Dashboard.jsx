@@ -59,7 +59,7 @@ const VoterDashboard = ({ voterId, voterCode, electionId, electionName, position
                                                                         className="mr-2"
                                                                     />
                                                                     <span>
-                                                                        <strong>{candidate.name}</strong>: {candidate.platform}
+                                                                        <strong>{candidate.name}</strong>
                                                                     </span>
                                                                 </label>
                                                             </li>
