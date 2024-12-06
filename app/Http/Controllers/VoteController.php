@@ -42,12 +42,6 @@ class VoteController extends Controller
             'candidates' => $candidates, // Pass the candidates to the frontend
         ]);
     }
-    public function index($positionId)
-    {
-        // Fetch votes for a specific position
-        $votes = Vote::where('position_id', $positionId)->get();
 
-        return response()->json($votes);
-    }
 
 }
