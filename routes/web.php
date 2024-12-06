@@ -119,14 +119,6 @@ Route::get('/sub-admin/login', function () {
     return Inertia::render('SubAdmin/Login');  // Make sure the path matches your JSX file
 })->name('subAdmin.login');
 
-Route::get('login', function () {
-    return Inertia::render('Login');  // Make sure the path matches your JSX file
-})->name('login');
-
-Route::get('register', function () {
-    return Inertia::render('Register');  // Make sure the path matches your JSX file
-})->name('register');
-
 
 Route::get('data', [Profile::class,
     'fetchData'

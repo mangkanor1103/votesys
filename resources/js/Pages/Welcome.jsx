@@ -41,6 +41,8 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
         });
     };
 
+
+
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
             <Head title="Welcome" />
@@ -114,29 +116,6 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             <FaChalkboardTeacher className="text-xl" /> Super Admin
                         </Link>
                     </CSSTransition>
-                </div>
-
-                {/* Log In and Sign Up Buttons Section */}
-                <div className="flex gap-6 justify-center mt-8">
-                    {/* Log In Button */}
-                    <Link
-                        href={route('login')}
-                        className={`text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'login' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
-                        onMouseEnter={() => handleHover('login')}
-                        onMouseLeave={handleLeave}
-                    >
-                        <FaSignOutAlt className="text-xl" /> Log In
-                    </Link>
-
-                    {/* Sign Up Button */}
-                    <Link
-                        href={route('register')}
-                        className={`text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'register' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
-                        onMouseEnter={() => handleHover('register')}
-                        onMouseLeave={handleLeave}
-                    >
-                        <FaSignOutAlt className="text-xl" /> Sign Up
-                    </Link>
                 </div>
 
                 {/* Contact Information */}
