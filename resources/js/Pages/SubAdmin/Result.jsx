@@ -4,14 +4,60 @@ import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt, FaBars }
 
 export default function Result() {
     const [votes, setVotes] = useState([]);
+    const [positions, setPositions] = useState([]);
+    const [candidates, setCandidates] = useState([]);
 
+    // Fetch votes, positions, and candidates data
     useEffect(() => {
-        // Fetch the vote results from your backend API
-        fetch('/api/votes') // Adjust the URL as needed
-            .then(response => response.json())
-            .then(data => setVotes(data))
-            .catch(error => console.error('Error fetching vote data:', error));
+        // Fetch votes, positions, and candidates (you can replace these with actual API calls)
+        const fetchVotes = async () => {
+            try {
+                const response = await fetch('/api/votes');
+                const data = await response.json();
+                console.log(data);  // Add this line to check if data is received
+                setVotes(data.votes);
+            } catch (error) {
+                console.error("Error fetching votes:", error);
+            }
+        };
+    
+        fetchVotes();
+        const fetchPositions = async () => {
+            try {
+                const response = await fetch('/api/positions'); // Replace with your actual API route for positions
+                const data = await response.json();
+                setPositions(data.positions);
+            } catch (error) {
+                console.error("Error fetching positions:", error);
+            }
+        };
+
+        const fetchCandidates = async () => {
+            try {
+                const response = await fetch('/api/candidates'); // Replace with your actual API route for candidates
+                const data = await response.json();
+                setCandidates(data.candidates);
+            } catch (error) {
+                console.error("Error fetching candidates:", error);
+            }
+        };
+
+        fetchVotes();
+        fetchPositions();
+        fetchCandidates();
     }, []);
+
+    // Get the name of the position by its ID
+    const getPositionName = (positionId) => {
+        const position = positions.find((p) => p.id === positionId);
+        return position ? position.name : 'Unknown Position';
+    };
+
+    // Get the name of the candidate by their ID
+    const getCandidateName = (candidateId) => {
+        const candidate = candidates.find((c) => c.id === candidateId);
+        return candidate ? candidate.name : 'Unknown Candidate';
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
@@ -21,17 +67,13 @@ export default function Result() {
             <nav className="bg-transparent text-white shadow-lg border-b-4 border-green-300 transition duration-500 ease-in-out transform hover:scale-105">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col sm:flex-row justify-between items-center">
-                        {/* Title */}
                         <h2 className="text-3xl font-extrabold text-green-100 tracking-wide">
                             Mindoro State University Voting System
                         </h2>
-
-                        {/* Hamburger Icon */}
                         <button className="sm:hidden text-white text-2xl">
                             <FaBars />
                         </button>
 
-                        {/* Navigation Links */}
                         <div className="flex flex-col sm:flex-row items-center gap-6 mt-4 sm:mt-0 sm:flex">
                             <Link
                                 href={route('subdashboard')}
@@ -84,20 +126,21 @@ export default function Result() {
                         </tr>
                     </thead>
                     <tbody>
-                        {votes.length === 0 ? (
-                            <tr>
-                                <td colSpan="4" className="px-4 py-2 text-center">No votes recorded</td>
-                            </tr>
-                        ) : (
-                            votes.map((vote) => (
-                                <tr key={vote.id}>
-                                    <td className="px-4 py-2 border-b">{vote.voter_id}</td>
-                                    <td className="px-4 py-2 border-b">{vote.position_id}</td>
-                                    <td className="px-4 py-2 border-b">{vote.candidate_id}</td>
-                                    <td className="px-4 py-2 border-b">{vote.created_at}</td>
-                                </tr>
-                            ))
-                        )}
+                    {votes.length === 0 ? (
+    <tr>
+        <td colSpan="4" className="px-4 py-2 text-center">No votes recorded</td>
+    </tr>
+) : (
+    votes.map((vote) => (
+        <tr key={vote.id}>
+            <td className="px-4 py-2 border-b">{vote.voter_id}</td>
+            <td className="px-4 py-2 border-b">{vote.position.name}</td> {/* Access position name */}
+            <td className="px-4 py-2 border-b">{vote.candidate.name}</td> {/* Access candidate name */}
+            <td className="px-4 py-2 border-b">{vote.created_at}</td>
+        </tr>
+    ))
+)}
+
                     </tbody>
                 </table>
             </div>

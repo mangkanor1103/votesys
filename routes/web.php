@@ -17,6 +17,9 @@ use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\ElectionResultController;
 use App\Http\Controllers\UserController;
 
+Route::get('/api/votes', [VoteController::class, 'index']);
+Route::get('/votes/{electionId}', [VoteController::class, 'index']);
+
 Route::get('/result', [VoteController::class, 'index'])->name('result');
 Route::get('/register', [UserController::class, 'register'])->name('user.register');
 Route::get('/login', [UserController::class, 'login'])->name('user.login');
