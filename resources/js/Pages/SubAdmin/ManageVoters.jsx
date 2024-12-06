@@ -33,19 +33,19 @@ export default function ManageVoters() {
 
     const handleGenerateCodes = async (event) => {
         event.preventDefault();
-    
+
         if (!electionId || !numCodes || numCodes <= 0) {
             setErrors(['Please ensure both Election Id and Number of Codes are valid.']);
             return;
         }
-    
+
         setProcessing(true);
         try {
             await axios.post('/voters/generate', {
                 election_id: electionId,
                 number_of_codes: numCodes,
             });
-    
+
             // Replace alert with SweetAlert2 notification
             Swal.fire({
                 title: 'Success!',
@@ -53,7 +53,7 @@ export default function ManageVoters() {
                 icon: 'success',
                 confirmButtonText: 'Okay'
             });
-    
+
             fetchCodes();
             setNumCodes('');
             setErrors([]);
@@ -64,7 +64,7 @@ export default function ManageVoters() {
             setProcessing(false);
         }
     };
-    
+
 
     const handleClearCodes = async () => {
         if (!electionId) {
@@ -105,6 +105,12 @@ export default function ManageVoters() {
                             <Link href={route('manage-candidates')} className="text-white flex items-center gap-2 px-6 py-3 rounded-lg hover:bg-green-700">
                                 <FaChalkboardTeacher className="text-xl" /> Manage Candidates
                             </Link>
+                            <Link
+                                href={route('result')}
+                                className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
+                            >
+                                <FaChalkboardTeacher className="text-xl" /> Result
+                            </Link>
                             <button className="text-white flex items-center gap-2 px-6 py-3 rounded-lg hover:bg-green-700">
                                 <FaSignOutAlt className="text-xl" /> Logout
                             </button>
@@ -133,6 +139,7 @@ export default function ManageVoters() {
                             className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-500 transition duration-300"
                             required
                             readOnly
+                            disabled
                         />
                     </div>
 

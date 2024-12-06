@@ -176,6 +176,12 @@ export default function ManageCandidates({ positions, electionId, flash }) {
                             <Link href={route('manage-candidates')} className="text-white flex items-center gap-2 px-6 py-3 rounded-lg">
                                 <FaChalkboardTeacher className="text-xl" /> Manage Candidates
                             </Link>
+                            <Link
+                                href={route('result')}
+                                className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
+                            >
+                                <FaChalkboardTeacher className="text-xl" /> Result
+                            </Link>
                             <button onClick={handleLogout} className="text-white flex items-center gap-2 px-6 py-3 rounded-lg">
                                 <FaSignOutAlt className="text-xl" /> Logout
                             </button>

@@ -114,6 +114,9 @@ Route::get('/manage-voters', function () {
 Route::get('/manage-candidates', function () {
     return Inertia::render('SubAdmin/ManageCandidates');
 })->name('manage-candidates');
+Route::get('/result', function () {
+    return Inertia::render('SubAdmin/Result');
+})->name('result');
 
 Route::get('/sub-admin/login', function () {
     return Inertia::render('SubAdmin/Login');  // Make sure the path matches your JSX file
