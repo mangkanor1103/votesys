@@ -15,6 +15,9 @@ use App\Http\Controllers\PositionController;
 use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\ElectionResultController;
+use App\Http\Controllers\UserController;
+Route::get('/register', [UserController::class, 'register'])->name('user.register');
+Route::get('/login', [UserController::class, 'login'])->name('user.login');
 
 Route::delete('/elections/{election}', [ElectionController::class, 'destroy'])->name('election.destroy');
 Route::get('/votes', [VoteController::class, 'index'])->name('votes');
@@ -116,6 +119,13 @@ Route::get('/sub-admin/login', function () {
     return Inertia::render('SubAdmin/Login');  // Make sure the path matches your JSX file
 })->name('subAdmin.login');
 
+Route::get('login', function () {
+    return Inertia::render('Login');  // Make sure the path matches your JSX file
+})->name('login');
+
+Route::get('register', function () {
+    return Inertia::render('Register');  // Make sure the path matches your JSX file
+})->name('register');
 
 
 Route::get('data', [Profile::class,

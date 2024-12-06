@@ -25,4 +25,19 @@ class UserController extends Controller
             'electionName' => $electionName,
         ]);
     }
+
+    public function register()
+    {
+        return response()->json(['message' => 'Registration Page']);
+    }
+
+    /**
+     * Return data for the login page.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function login()
+    {
+        return response()->json(['message' => 'Login Page']);
+    }
 }

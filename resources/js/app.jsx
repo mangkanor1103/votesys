@@ -7,6 +7,17 @@ import { createRoot } from 'react-dom/client';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
+const App = () => {
+    return (
+        <Router>
+            <Switch>
+                <Route path="/register" component={Register} />
+                <Route path="/login" component={Login} />
+            </Switch>
+        </Router>
+    );
+};
+
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
     resolve: (name) =>
