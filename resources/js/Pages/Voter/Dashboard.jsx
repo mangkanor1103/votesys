@@ -116,6 +116,7 @@ const VoterDashboard = ({ voterId, electionName, positions, success }) => {
                                                                     type="button"
                                                                     onClick={() => handleAbstain(position.id)}
                                                                     className="py-2 px-4 bg-red-500 text-white rounded-md hover:bg-gray-600 focus:outline-none"
+
                                                                 >
                                                                     Abstain
                                                                 </button>
