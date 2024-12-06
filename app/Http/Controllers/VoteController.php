@@ -14,6 +14,7 @@ class VoteController extends Controller
     {
         $validated = $request->validate([
             'voter_id' => 'required|exists:voters,id',
+            'election_id' => 'required|exists:elections,id',
             'votes' => 'required|array',
             'votes.*.position_id' => 'required|exists:positions,id',
             'votes.*.candidate_id' => 'required|exists:candidates,id',
@@ -25,6 +26,7 @@ class VoteController extends Controller
                     [
                         'voter_id' => $validated['voter_id'],
                         'position_id' => $vote['position_id'],
+                        'election_id' => $validated['election_id'],
                     ],
                     ['candidate_id' => $vote['candidate_id']]
                 );
@@ -42,13 +44,16 @@ class VoteController extends Controller
             'candidates' => $candidates, // Pass the candidates to the frontend
         ]);
     }
-    public function index()
+
+    public function index($electionId)
     {
-        $votes = Vote::with(['position', 'candidate'])->get();
+        $votes = Vote::where('election_id', $electionId)
+                     ->with(['position', 'candidate'])
+                     ->get();
 
-    return response()->json(['votes' => $votes]);
-
+        return response()->json(['votes' => $votes]);
     }
+
 
 
 }

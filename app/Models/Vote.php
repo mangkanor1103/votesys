@@ -8,11 +8,8 @@ class Vote extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'voter_id',
-        'position_id',
-        'candidate_id',
-    ];
+    protected $fillable = ['voter_id', 'position_id', 'candidate_id', 'election_id'];
+
 
     public function voter()
     {

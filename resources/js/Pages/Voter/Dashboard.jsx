@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 import Swal from 'sweetalert2'; // Import SweetAlert2 for success notifications
 
-const VoterDashboard = ({ voterId, electionName, positions }) => {
+const VoterDashboard = ({ voterId, electionName, electionId, positions }) => {
     const [selectedVotes, setSelectedVotes] = useState({}); // Track selected candidates for each position
 
     // Handle selection of a candidate
@@ -25,26 +25,29 @@ const VoterDashboard = ({ voterId, electionName, positions }) => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
         const votes = Object.entries(selectedVotes).map(([positionId, candidateId]) => ({
             position_id: positionId,
             candidate_id: candidateId,
         }));
-    
+
         try {
             // Submit the votes
-            await Inertia.post(route('vote.store'), { voter_id: voterId, votes });
-    
+            await Inertia.post(route('vote.store'), {
+                voter_id: voterId,
+                election_id: electionId, // Include election_id in the payload
+                votes
+            });
+
             // Show success notification using SweetAlert2
             Swal.fire({
                 title: 'Success!',
                 text: 'Your vote has been submitted successfully!',
                 icon: 'success',
                 confirmButtonText: 'OK',
-                
             }).then(() => {
                 // Redirect to Welcome.jsx after clicking OK
-                window.location.href = '/';  // Assuming '/' is the route for Welcome.jsx
+                window.location.href = '/'; // Assuming '/' is the route for Welcome.jsx
             });
         } catch (error) {
             console.error("Error submitting vote:", error);
@@ -57,7 +60,6 @@ const VoterDashboard = ({ voterId, electionName, positions }) => {
             });
         }
     };
-    
 
     return (
         <div>
