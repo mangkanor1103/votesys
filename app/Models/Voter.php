@@ -15,4 +15,13 @@ class Voter extends Model
     {
         return $this->belongsTo(Election::class);
     }
+    public function position()
+    {
+        return $this->belongsTo(Position::class);
+    }
+
+    public function candidate()
+    {
+        return $this->belongsTo(Candidate::class);
+    }
 }

@@ -1,12 +1,16 @@
 <?php
+
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Vote;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class VoteController extends Controller
 {
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -16,19 +20,23 @@ class VoteController extends Controller
             'votes.*.candidate_id' => 'required|exists:candidates,id',
         ]);
 
-        foreach ($validated['votes'] as $vote) {
-            Vote::updateOrCreate(
-                [
-                    'voter_id' => $validated['voter_id'],
-                    'position_id' => $vote['position_id'],
-                ],
-                ['candidate_id' => $vote['candidate_id']]
-            );
-        }
+        DB::transaction(function () use ($validated) {
+            foreach ($validated['votes'] as $vote) {
+                Vote::updateOrCreate(
+                    [
+                        'voter_id' => $validated['voter_id'],
+                        'position_id' => $vote['position_id'],
+                    ],
+                    ['candidate_id' => $vote['candidate_id']]
+                );
+            }
+        });
 
         return Inertia::render('VoterDashboard', [
             'success' => 'Votes submitted successfully!',
-            // Other data like voterId, election details, etc.
         ]);
     }
+
+
+
 }

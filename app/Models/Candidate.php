@@ -8,13 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Candidate extends Model
 {
     use HasFactory;
+    protected $fillable = ['election_id', 'position_id', 'name', 'platform', 'photo'];
 
-    protected $fillable = [
-        'election_id',
-        'position_id',
-        'name',
-        'platform',
-    ];
 
     public function position()
     {
@@ -24,5 +19,13 @@ class Candidate extends Model
     public function election()
     {
         return $this->belongsTo(Election::class);
+    }
+    public function voter()
+    {
+        return $this->belongsTo(Voter::class);
+    }
+    public function vote()
+    {
+        return $this->belongsTo(Voter::class);
     }
 }
