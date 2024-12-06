@@ -94,6 +94,7 @@ const VoterDashboard = ({ voterId, electionName, positions, success }) => {
                                                                             value={candidate.id}
                                                                             checked={selectedVotes[position.id] === candidate.id}
                                                                             onChange={() => handleVoteChange(position.id, candidate.id)}
+                                                                            disabled={selectedVotes[position.id]}
                                                                             className="form-radio"
                                                                         />
                                                                     </td>
