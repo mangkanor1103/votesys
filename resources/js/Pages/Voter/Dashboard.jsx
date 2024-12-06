@@ -1,25 +1,10 @@
-
-
 import { Head } from '@inertiajs/react';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 import Swal from 'sweetalert2'; // Import SweetAlert2 for success notifications
 
-const VoterDashboard = ({ voterId, electionName, positions, success }) => {
+const VoterDashboard = ({ voterId, electionName, positions }) => {
     const [selectedVotes, setSelectedVotes] = useState({}); // Track selected candidates for each position
-
-    // Show success message on success
-    useEffect(() => {
-        if (success) {
-            Swal.fire({
-                title: 'Success!',
-                text: success,
-                icon: 'success',
-                confirmButtonText: 'OK',
-                timer: 3000, // Auto-close after 3 seconds
-            });
-        }
-    }, [success]);
 
     // Handle selection of a candidate
     const handleVoteChange = (positionId, candidateId) => {
@@ -38,16 +23,41 @@ const VoterDashboard = ({ voterId, electionName, positions, success }) => {
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         const votes = Object.entries(selectedVotes).map(([positionId, candidateId]) => ({
             position_id: positionId,
             candidate_id: candidateId,
         }));
-
-        Inertia.post(route('vote.store'), { voter_id: voterId, votes });
+    
+        try {
+            // Submit the votes
+            await Inertia.post(route('vote.store'), { voter_id: voterId, votes });
+    
+            // Show success notification using SweetAlert2
+            Swal.fire({
+                title: 'Success!',
+                text: 'Your vote has been submitted successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                
+            }).then(() => {
+                // Redirect to Welcome.jsx after clicking OK
+                window.location.href = '/';  // Assuming '/' is the route for Welcome.jsx
+            });
+        } catch (error) {
+            console.error("Error submitting vote:", error);
+            // Optionally, show an error alert
+            Swal.fire({
+                title: 'Error!',
+                text: 'There was an issue submitting your vote. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+            });
+        }
     };
+    
 
     return (
         <div>
