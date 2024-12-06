@@ -23,4 +23,12 @@ class Position extends Model
     {
         return $this->hasMany(Candidate::class);
     }
+    public function voter()
+    {
+        return $this->belongsTo(Voter::class);
+    }
+    public function vote()
+    {
+        return $this->belongsTo(Voter::class);
+    }
 }
