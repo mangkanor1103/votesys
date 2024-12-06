@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FaUsers, FaHome, FaRegFlag, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa';
 import { Link } from '@inertiajs/react';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 export default function ManageVoters() {
     const [numCodes, setNumCodes] = useState('');
@@ -32,20 +33,27 @@ export default function ManageVoters() {
 
     const handleGenerateCodes = async (event) => {
         event.preventDefault();
-
+    
         if (!electionId || !numCodes || numCodes <= 0) {
             setErrors(['Please ensure both Election ID and Number of Codes are valid.']);
             return;
         }
-
+    
         setProcessing(true);
         try {
             await axios.post('/voters/generate', {
                 election_id: electionId,
                 number_of_codes: numCodes,
             });
-
-            alert('Voter codes generated successfully!');
+    
+            // Replace alert with SweetAlert2 notification
+            Swal.fire({
+                title: 'Success!',
+                text: 'Voter codes generated successfully!',
+                icon: 'success',
+                confirmButtonText: 'Okay'
+            });
+    
             fetchCodes();
             setNumCodes('');
             setErrors([]);
@@ -56,6 +64,7 @@ export default function ManageVoters() {
             setProcessing(false);
         }
     };
+    
 
     const handleClearCodes = async () => {
         if (!electionId) {
