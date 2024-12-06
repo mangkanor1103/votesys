@@ -35,7 +35,7 @@ export default function ManageVoters() {
         event.preventDefault();
     
         if (!electionId || !numCodes || numCodes <= 0) {
-            setErrors(['Please ensure both Election ID and Number of Codes are valid.']);
+            setErrors(['Please ensure both Election Id and Number of Codes are valid.']);
             return;
         }
     

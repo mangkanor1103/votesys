@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Vote;
+use Inertia\Inertia;
 
 class VoteController extends Controller
 {
@@ -25,6 +26,9 @@ class VoteController extends Controller
             );
         }
 
-        return response()->json(['success' => 'Votes submitted successfully!'], 200);
+        return Inertia::render('VoterDashboard', [
+            'success' => 'Votes submitted successfully!',
+            // Other data like voterId, election details, etc.
+        ]);
     }
 }

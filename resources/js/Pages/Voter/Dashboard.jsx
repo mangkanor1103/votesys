@@ -1,14 +1,35 @@
 import { Head } from '@inertiajs/react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Inertia } from '@inertiajs/inertia';
+import Swal from 'sweetalert2'; // Import SweetAlert2
 
-const VoterDashboard = ({ voterId, voterCode, electionId, electionName, positions }) => {
+const VoterDashboard = ({ voterId, voterCode, electionId, electionName, positions, success }) => {
     const [selectedVotes, setSelectedVotes] = useState({}); // Track selected candidates for each position
+
+    // Use useEffect to trigger SweetAlert2 when success message is received
+    useEffect(() => {
+        if (success) {
+            Swal.fire({
+                title: 'Success!',
+                text: success,
+                icon: 'success',
+                confirmButtonText: 'OK',
+                timer: 3000, // Automatically close after 3 seconds
+            });
+        }
+    }, [success]);
 
     const handleVoteChange = (positionId, candidateId) => {
         setSelectedVotes((prev) => ({
             ...prev,
             [positionId]: candidateId,
+        }));
+    };
+
+    const handleAbstain = (positionId) => {
+        setSelectedVotes((prev) => ({
+            ...prev,
+            [positionId]: 'abstain',
         }));
     };
 
@@ -48,20 +69,28 @@ const VoterDashboard = ({ voterId, voterCode, electionId, electionName, position
                                                 <ul className="list-none space-y-2 mt-2">
                                                     {position.candidates && position.candidates.length > 0 ? (
                                                         position.candidates.map((candidate) => (
-                                                            <li key={candidate.id}>
-                                                                <label className="flex items-center">
-                                                                    <input
-                                                                        type="radio"
-                                                                        name={`position_${position.id}`}
-                                                                        value={candidate.id}
-                                                                        checked={selectedVotes[position.id] === candidate.id}
-                                                                        onChange={() => handleVoteChange(position.id, candidate.id)}
-                                                                        className="mr-2"
+                                                            <li key={candidate.id} className="flex items-center">
+                                                                {/* Candidate Photo as Button */}
+                                                                <div
+                                                                    onClick={() => handleVoteChange(position.id, candidate.id)}
+                                                                    className="w-16 h-16 rounded-full overflow-hidden cursor-pointer border-2 border-gray-400 hover:opacity-80"
+                                                                >
+                                                                    <img
+                                                                        src={candidate.photo}
+                                                                        className="object-cover w-full h-full"
                                                                     />
-                                                                    <span>
-                                                                        <strong>{candidate.name}</strong>
-                                                                    </span>
-                                                                </label>
+                                                                </div>
+                                                                {/* Candidate Name and Abstain Option */}
+                                                                <div className="flex justify-between items-center ml-4 w-full">
+                                                                    <span className="font-semibold">{candidate.name}</span>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleAbstain(position.id)}
+                                                                        className={`py-1 px-3 bg-red-500 text-white rounded-md hover:bg-gray-600 focus:outline-none`}
+                                                                    >
+                                                                        Abstain
+                                                                    </button>
+                                                                </div>
                                                             </li>
                                                         ))
                                                     ) : (
