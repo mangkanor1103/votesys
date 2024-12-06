@@ -8,6 +8,7 @@ export default function Welcome() {
     const [electionId, setElectionId] = useState('');
     const [electionName, setElectionName] = useState('');
     const [electionDate, setElectionDate] = useState('');
+    const [votes, setVotes] = useState([]);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
@@ -21,7 +22,24 @@ export default function Welcome() {
         setElectionId(storedElectionId || 'N/A');
         setElectionName(storedElectionName || 'N/A');
         setElectionDate(storedElectionDate || 'N/A');
+
+        // Fetch the votes data
+        fetchVotes();
     }, []);
+
+    const fetchVotes = async (positionId) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:8000/votes/${positionId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch votes');
+            }
+            const data = await response.json();
+            setVotes(data);
+        } catch (error) {
+            console.error('Error fetching votes:', error);
+        }
+    };
+
 
     const handleLogout = async () => {
         try {
@@ -32,11 +50,9 @@ export default function Welcome() {
         }
     };
 
-
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
             <Head title="Welcome" />
-
             {/* Navbar */}
             <nav className="bg-transparent text-white shadow-lg border-b-4 border-green-300 transition duration-500 ease-in-out transform hover:scale-105">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -121,6 +137,30 @@ export default function Welcome() {
                                     <p className="text-xl font-semibold">Election Date:</p>
                                     <p className="text-gray-800 text-2xl">{electionDate}</p>
                                 </div>
+                            </div>
+                            {/* Display votes data */}
+                            <div className="mt-6">
+                                <h3 className="text-xl font-semibold text-green-600 mb-4">Votes Data:</h3>
+                                <table className="min-w-full table-auto">
+                                    <thead>
+                                        <tr className="bg-green-100">
+                                            <th className="px-4 py-2 text-left">Voter ID</th>
+                                            <th className="px-4 py-2 text-left">Position</th>
+                                            <th className="px-4 py-2 text-left">Candidate</th>
+                                            <th className="px-4 py-2 text-left">Vote Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {votes.map((vote) => (
+                                            <tr key={vote.id} className="border-t">
+                                                <td className="px-4 py-2">{vote.voter_id}</td>
+                                                <td className="px-4 py-2">{vote.position}</td>
+                                                <td className="px-4 py-2">{vote.candidate}</td>
+                                                <td className="px-4 py-2">{vote.vote_time}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>

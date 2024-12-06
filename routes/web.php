@@ -8,7 +8,7 @@ use App\Http\Controllers\ShareController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use App\Http\Controllers\SubAdminController;
+use App\Http\Controllers\VoteController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\PositionController;
@@ -17,7 +17,7 @@ use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\ElectionResultController;
 
 Route::delete('/elections/{election}', [ElectionController::class, 'destroy'])->name('election.destroy');
-
+Route::get('/votes', [VoteController::class, 'index'])->name('votes');
 
 //UPDATE AN ELECTION
 Route::post('/election/update/{id}', [ElectionController::class, 'update'])->name('election.update');
@@ -79,7 +79,6 @@ Route::get('/users', function () {
 
 
 Route::post('/upload-candidate-photo', [CandidateController::class, 'uploadPhoto']);
-use App\Http\Controllers\VoteController;
 
 Route::post('/vote', [VoteController::class, 'store'])->name('vote.store');
 Route::get('/election/{electionId}/results', [ElectionResultController::class, 'index'])->name('election.results');
