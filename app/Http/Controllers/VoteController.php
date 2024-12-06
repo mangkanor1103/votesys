@@ -42,6 +42,16 @@ class VoteController extends Controller
             'candidates' => $candidates, // Pass the candidates to the frontend
         ]);
     }
+    public function index()
+    {
+        // Fetch all votes, you can customize this query if necessary
+        $votes = Vote::with(['voter', 'position', 'candidate'])->get(); // You can modify this query to suit your needs
+
+        // Pass the votes to the view via Inertia
+        return Inertia::render('Result', [
+            'votes' => $votes
+        ]);
+    }
 
 
 }
