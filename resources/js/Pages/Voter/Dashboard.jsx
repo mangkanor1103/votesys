@@ -1,9 +1,12 @@
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import React, { useState } from 'react';
 import { Inertia } from '@inertiajs/inertia';
 import Swal from 'sweetalert2'; // Import SweetAlert2 for success notifications
 
 const VoterDashboard = ({ voterId, electionName, electionId, positions }) => {
+    const { props } = usePage(); // Access the Inertia page props
+    const successMessage = props.success; // Success message from server
+
     const [selectedVotes, setSelectedVotes] = useState({}); // Track selected candidates for each position
 
     // Handle selection of a candidate
@@ -25,20 +28,20 @@ const VoterDashboard = ({ voterId, electionName, electionId, positions }) => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+    
         const votes = Object.entries(selectedVotes).map(([positionId, candidateId]) => ({
             position_id: positionId,
-            candidate_id: candidateId,
+            candidate_id: candidateId === 'abstain' ? null : candidateId, // Ensure null is set for abstain
         }));
-
+        
         try {
             // Submit the votes
             await Inertia.post(route('vote.store'), {
                 voter_id: voterId,
                 election_id: electionId, // Include election_id in the payload
-                votes
+                votes,
             });
-
+    
             // Show success notification using SweetAlert2
             Swal.fire({
                 title: 'Success!',
@@ -60,10 +63,19 @@ const VoterDashboard = ({ voterId, electionName, electionId, positions }) => {
             });
         }
     };
+    
 
     return (
         <div>
             <Head title="Voter Dashboard" />
+            
+            {/* Display success message if it exists */}
+            {successMessage && (
+                <div className="bg-green-500 text-white p-4 mb-4 rounded-md">
+                    {successMessage}
+                </div>
+            )}
+
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="bg-gradient-to-r from-green-700 via-teal-700 to-green-500 shadow-lg sm:rounded-lg border-t-4 border-green-700">

@@ -6,25 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('votes', function (Blueprint $table) {
-            $table->unsignedBigInteger('election_id')->after('voter_id');
-            $table->foreign('election_id')->references('id')->on('elections')->onDelete('cascade');
+            $table->unsignedBigInteger('candidate_id')->nullable()->change(); // Allow NULL for candidate_id
         });
     }
 
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('votes', function (Blueprint $table) {
-            //
+            $table->unsignedBigInteger('candidate_id')->nullable(false)->change(); // Revert if needed
         });
     }
 };
