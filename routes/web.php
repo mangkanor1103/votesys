@@ -17,8 +17,7 @@ use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\ElectionResultController;
 use App\Http\Controllers\UserController;
 
-Route::get('/api/votes/{electionId}', [VoteController::class, 'index']);
-Route::get('/votes/{electionId}', [VoteController::class, 'index']);  // For fetching votes
+Route::get('/api/votes/{electionId}', [VoteController::class, 'getVotesByElection']);
 Route::post('/votes', [VoteController::class, 'store']);  // For storing votes
 Route::get('/votes', [VoteController::class, 'index']);
 Route::get('/positions', [PositionController::class, 'index']);

@@ -5,13 +5,35 @@ import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt, FaBars }
 export default function Welcome() {
     const { post } = useForm();
     const [electionId, setElectionId] = useState('');
+    const [votes, setVotes] = useState([]);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
         // Fetch election details from localStorage
         const storedElectionId = localStorage.getItem('election_id');
         setElectionId(storedElectionId || 'N/A');
+
+        // Fetch the votes for the election
+        if (storedElectionId) {
+            fetchVotes(storedElectionId);
+        }
     }, []);
+
+    const fetchVotes = async (electionId) => {
+        try {
+            const response = await fetch(`/api/votes/${electionId}`);  // Adjust your API endpoint accordingly
+            const data = await response.json();
+
+            // Ensure the response contains votes data
+            if (data && data.votes) {
+                setVotes(data.votes);
+            } else {
+                console.error("Votes data not available or malformed.");
+            }
+        } catch (error) {
+            console.error("Error fetching votes:", error);
+        }
+    };
 
     const handleLogout = async () => {
         try {
@@ -21,6 +43,21 @@ export default function Welcome() {
             console.error("Logout failed:", error);
         }
     };
+
+    // Group votes by position_id and count occurrences of each candidate_id
+    const groupedVotes = votes.reduce((acc, vote) => {
+        if (!acc[vote.position_id]) {
+            acc[vote.position_id] = {};
+        }
+
+        // Count the votes for each candidate
+        if (!acc[vote.position_id][vote.candidate_id]) {
+            acc[vote.position_id][vote.candidate_id] = 0;
+        }
+        acc[vote.position_id][vote.candidate_id] += 1;
+
+        return acc;
+    }, {});
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
@@ -100,6 +137,46 @@ export default function Welcome() {
                                 <div className="text-green-700 text-lg font-semibold">
                                     <p className="text-xl font-semibold">Election ID:</p>
                                     <p className="text-gray-800 text-2xl">{electionId}</p>
+                                </div>
+                                <div className="space-y-4 mt-6">
+                                    {Object.keys(groupedVotes).length > 0 ? (
+                                        Object.keys(groupedVotes).map((positionId) => {
+                                            const candidateVotes = groupedVotes[positionId];
+                                            const maxVotes = Math.max(...Object.values(candidateVotes));
+                                            const winningCandidate = Object.keys(candidateVotes).find(
+                                                (candidateId) => candidateVotes[candidateId] === maxVotes
+                                            );
+
+                                            return (
+                                                <div key={positionId} className="bg-gray-100 p-4 rounded-lg shadow-md">
+                                                    <h4 className="text-xl font-semibold text-green-700">
+                                                        Position ID: {positionId}
+                                                    </h4>
+                                                    <table className="min-w-full mt-4">
+                                                        <thead>
+                                                            <tr>
+                                                                <th className="border px-4 py-2 text-left">Candidate ID</th>
+                                                                <th className="border px-4 py-2 text-left">Vote Count</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {Object.keys(candidateVotes).map((candidateId) => (
+                                                                <tr key={candidateId}>
+                                                                    <td className="border px-4 py-2">{candidateId}</td>
+                                                                    <td className="border px-4 py-2">{candidateVotes[candidateId]}</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                    <p className="mt-4 text-lg font-semibold text-green-800">
+                                                        Winning Candidate ID: {winningCandidate} with {maxVotes} votes
+                                                    </p>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <p>No votes found for this election.</p>
+                                    )}
                                 </div>
                             </div>
                         </div>

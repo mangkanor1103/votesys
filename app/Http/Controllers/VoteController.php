@@ -20,37 +20,47 @@ class VoteController extends Controller
             'votes.*.candidate_id' => 'required|exists:candidates,id',
         ]);
 
-        DB::transaction(function () use ($validated) {
-            foreach ($validated['votes'] as $vote) {
-                Vote::updateOrCreate(
-                    [
-                        'voter_id' => $validated['voter_id'],
-                        'position_id' => $vote['position_id'],
-                        'election_id' => $validated['election_id'],
-                    ],
-                    ['candidate_id' => $vote['candidate_id']]
-                );
-            }
-        });
+        try {
+            DB::transaction(function () use ($validated) {
+                foreach ($validated['votes'] as $vote) {
+                    // Check if the voter has already voted for this position
+                    $existingVote = Vote::where('voter_id', $validated['voter_id'])
+                        ->where('position_id', $vote['position_id'])
+                        ->where('election_id', $validated['election_id'])
+                        ->exists();
 
-        // Fetch candidate data including photo for the voter dashboard
-        $candidateIds = collect($validated['votes'])->pluck('candidate_id');
-        $candidates = Candidate::whereIn('id', $candidateIds)
-            ->get(['id', 'name', 'photo']); // Adjust the fields based on your Candidate model
+                    if ($existingVote) {
+                        throw new \Exception('You have already voted for this position.');
+                    }
 
-        // Pass the candidates data to Inertia
-        return Inertia::render('VoterDashboard', [
-            'success' => 'Votes submitted successfully!',
-            'candidates' => $candidates, // Pass the candidates to the frontend
-        ]);
+                    Vote::updateOrCreate(
+                        [
+                            'voter_id' => $validated['voter_id'],
+                            'position_id' => $vote['position_id'],
+                            'election_id' => $validated['election_id'],
+                        ],
+                        ['candidate_id' => $vote['candidate_id']]
+                    );
+                }
+            });
+
+            // Fetch candidate data including photo for the voter dashboard
+            $candidateIds = collect($validated['votes'])->pluck('candidate_id')->unique();
+            $candidates = Candidate::whereIn('id', $candidateIds)
+                ->get(['id', 'name', 'photo']); // Adjust fields if needed
+
+            return Inertia::render('VoterDashboard', [
+                'success' => 'Votes submitted successfully!',
+                'candidates' => $candidates,
+            ]);
+        } catch (\Exception $e) {
+            return back()->withErrors(['msg' => $e->getMessage()]);
+        }
     }
 
-    public function index($electionId)
+    public function getVotesByElection($electionId)
     {
-        $votes = Vote::where('election_id', $electionId)
-                     ->with(['position', 'candidate'])
-                     ->get();
-
+        $votes = Vote::where('election_id', $electionId)->get();
         return response()->json(['votes' => $votes]);
     }
 
