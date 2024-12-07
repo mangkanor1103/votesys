@@ -5,6 +5,7 @@ import PrimaryButton from "@/Components/PrimaryButton";
 import { Head, useForm } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Inertia } from '@inertiajs/inertia';
+import Swal from 'sweetalert2'; // Import SweetAlert2
 
 export default function Elections({ auth, elections }) {
     const { data, setData, post, processing, reset, errors } = useForm({
@@ -18,7 +19,7 @@ export default function Elections({ auth, elections }) {
     // Handle Submit (Create or Update Election)
     const submit = (e) => {
         e.preventDefault(); // Prevent page refresh
-
+    
         if (editingElection) {
             handleUpdate();
         } else {
@@ -27,15 +28,19 @@ export default function Elections({ auth, elections }) {
                 data: { election_name: data.election_name, election_date: data.election_date },
                 onSuccess: (response) => {
                     console.log("Response after creating election:", response); // Debug log to check the response
-
+    
                     if (response.props && response.props.election) {
                         const newElection = response.props.election;
                         console.log("New election object:", newElection); // Debug log for new election
-
+    
                         // Update elections list immediately with the new election
-                        setElectionsList(prev => {
-                            console.log("Previous elections list before adding new one:", prev); // Debug log
-                            return [...prev, newElection];
+                        setElectionsList(prevElections => [...prevElections, newElection]);
+    
+                        // Show success notification after creating election
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Election Created!',
+                            text: 'The new election has been added successfully.',
                         });
                     } else {
                         console.error('New election not returned in response.');
@@ -48,6 +53,8 @@ export default function Elections({ auth, elections }) {
             });
         }
     };
+    
+    
 
     // Handle Edit Election
     const handleEdit = (election) => {
@@ -73,23 +80,45 @@ export default function Elections({ auth, elections }) {
                 );
                 setEditingElection(null);
                 reset();
+
+                // Show success notification after successful update
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Updated!',
+                    text: 'The election has been updated successfully.',
+                });
+            },
+            onError: (error) => {
+                console.error('Error:', error); // Optional: handle any errors from the server
             },
         });
     };
 
-    // Handle Delete Election
+    // Handle Delete Election with SweetAlert2
     const handleDelete = (electionId) => {
-        if (window.confirm("Are you sure you want to delete this election?")) {
-            // Optimistic UI update: Remove election from the list immediately
-            setElectionsList(prevElections => prevElections.filter(election => election.id !== electionId));
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You won\'t be able to revert this!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Optimistic UI update: Remove election from the list immediately
+                setElectionsList(prevElections => prevElections.filter(election => election.id !== electionId));
 
-            Inertia.delete(route('election.destroy', electionId), {
-                onError: () => {
-                    // If deletion fails, add the election back to the list
-                    setElectionsList(prevElections => [...prevElections, prevElections.find(election => election.id === electionId)]);
-                },
-            });
-        }
+                Inertia.delete(route('election.destroy', electionId), {
+                    onError: () => {
+                        // If deletion fails, add the election back to the list
+                        setElectionsList(prevElections => [...prevElections, prevElections.find(election => election.id === electionId)]);
+                    },
+                });
+
+                Swal.fire('Deleted!', 'The election has been deleted.', 'success');
+            }
+        });
     };
 
     return (
