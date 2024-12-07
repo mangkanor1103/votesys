@@ -24,7 +24,7 @@ export default function ManagePositions({ positions, electionId, flash }) {
                 const finalElectionId = electionId || storedElectionId;
                 if (finalElectionId) {
                     const response = await axios.get(`/positions/${finalElectionId}`);
-                    setPositionsData(response.data); // Assuming response.data contains the positions
+                    setPositionsData(response.data);
                 }
             } catch (error) {
                 console.error('Error fetching positions:', error);
@@ -171,7 +171,7 @@ export default function ManagePositions({ positions, electionId, flash }) {
 
             {/* Main Content */}
             <div className="py-12">
-                <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-xl sm:rounded-lg border-t-4 border-green-500">
                         <div className="p-8 text-gray-900">
                             <h3 className="text-2xl font-medium text-green-600 mb-6">
@@ -191,76 +191,85 @@ export default function ManagePositions({ positions, electionId, flash }) {
 
                             <div className="mt-6">
                                 <form onSubmit={handleCreateOrUpdatePosition}>
-                                    <div className="mb-4">
-                                        <label htmlFor="positionName" className="block text-sm font-medium text-gray-700">
-                                            Position Name
-                                        </label>
-                                        <input
-                                            type="text"
-                                            id="positionName"
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                            value={positionName}
-                                            onChange={(e) => setPositionName(e.target.value)}
-                                            required
-                                        />
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="mb-4">
+                                            <label htmlFor="positionName" className="block text-sm font-medium text-gray-700">
+                                                Position Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                id="positionName"
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                value={positionName}
+                                                onChange={(e) => setPositionName(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="mb-4">
+                                            <label htmlFor="maxVotes" className="block text-sm font-medium text-gray-700">
+                                                Max Votes
+                                            </label>
+                                            <input
+                                                type="number"
+                                                id="maxVotes"
+                                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                                value={maxVotes}
+                                                onChange={(e) => setMaxVotes(e.target.value)}
+                                                required
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="mb-4">
-                                        <label htmlFor="maxVotes" className="block text-sm font-medium text-gray-700">
-                                            Max Votes
-                                        </label>
-                                        <input
-                                            type="number"
-                                            id="maxVotes"
-                                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                            value={maxVotes}
-                                            onChange={(e) => setMaxVotes(e.target.value)}
-                                            required
-                                        />
-                                    </div>
-                                    <button
-                                        type="submit"
-                                        className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-300 ease-in-out"
-                                    >
-                                        {isEditing ? 'Update Position' : 'Create Position'}
-                                    </button>
-                                </form>
-                            </div>
-
-                            <div className="mt-8">
-                                <h3 className="text-xl font-medium text-gray-900 mb-4">Position List</h3>
-                                {loading ? (
-                                    <div>Loading...</div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        {positionsData.map((position) => (
-                                            <div
-                                                key={position.id}
-                                                className="bg-white p-4 rounded-lg shadow-md transition transform hover:scale-105 hover:shadow-xl"
+                                    <div className="flex justify-between mt-4">
+                                        <button
+                                            type="submit"
+                                            className="inline-flex items-center px-6 py-2 bg-green-500 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-green-300 hover:bg-green-600"
+                                        >
+                                            {isEditing ? 'Update Position' : 'Create Position'}
+                                        </button>
+                                        {isEditing && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setIsEditing(false);
+                                                    setEditPositionId(null);
+                                                    setPositionName('');
+                                                    setMaxVotes('');
+                                                }}
+                                                className="inline-flex items-center px-6 py-2 bg-red-500 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-red-300 hover:bg-red-600"
                                             >
-                                                <div className="flex justify-between items-center">
-                                                    <div className="flex flex-col">
-                                                        <h4 className="text-xl font-semibold text-gray-800">{position.name}</h4>
-                                                        <span className="text-sm text-gray-600">Max Votes: {position.max_votes}</span>
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => handleEdit(position)}
-                                                            className="text-blue-600 hover:text-blue-800 transition duration-200"
-                                                        >
-                                                            <FaPen className="text-lg" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDelete(position.id)}
-                                                            className="text-red-600 hover:text-red-800 transition duration-200"
-                                                        >
-                                                            <FaTrashAlt className="text-lg" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        ))}
+                                                Cancel
+                                            </button>
+                                        )}
                                     </div>
-                                )}
+                                </form>
+
+                                <div className="mt-8">
+                                    <h3 className="text-xl font-semibold text-green-600">Existing Positions</h3>
+                                    <ul className="mt-4 space-y-4">
+                                        {positionsData.map((position) => (
+                                            <li key={position.id} className="flex justify-between items-center py-4">
+                                                <div>
+                                                    <p className="text-lg font-semibold text-gray-800">{position.name}</p>
+                                                    <p className="text-sm text-gray-500">Max Votes: {position.max_votes}</p>
+                                                </div>
+                                                <div className="flex gap-4">
+                                                    <button
+                                                        onClick={() => handleEdit(position)}
+                                                        className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                                                    >
+                                                        <FaPen />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(position.id)}
+                                                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                                                    >
+                                                        <FaTrashAlt />
+                                                    </button>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>

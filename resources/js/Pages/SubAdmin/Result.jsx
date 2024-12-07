@@ -1,74 +1,52 @@
-import { useEffect, useState } from 'react';
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
 import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt, FaBars } from 'react-icons/fa';
 
-export default function Result() {
-    const [votes, setVotes] = useState([]);
-    const [positions, setPositions] = useState([]);
-    const [candidates, setCandidates] = useState([]);
+export default function Welcome() {
+    const { post } = useForm();
+    const [electionId, setElectionId] = useState('');
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
-        const fetchVotes = async () => {
-            try {
-                const response = await fetch('/api/votes');
-                const data = await response.json();
-                console.log(data); // Add this line to check if data is received
-                setVotes(data.votes);
-            } catch (error) {
-                console.error("Error fetching votes:", error);
-            }
-        };
-
-        const fetchPositions = async () => {
-            try {
-                const response = await fetch('/api/positions');
-                const data = await response.json();
-                setPositions(data.positions);
-            } catch (error) {
-                console.error("Error fetching positions:", error);
-            }
-        };
-
-        const fetchCandidates = async () => {
-            try {
-                const response = await fetch('/api/candidates');
-                const data = await response.json();
-                setCandidates(data.candidates);
-            } catch (error) {
-                console.error("Error fetching candidates:", error);
-            }
-        };
-
-        fetchVotes();
-        fetchPositions();
-        fetchCandidates();
+        // Fetch election details from localStorage
+        const storedElectionId = localStorage.getItem('election_id');
+        setElectionId(storedElectionId || 'N/A');
     }, []);
 
-    const getPositionName = (positionId) => {
-        const position = positions.find((p) => p.id === positionId);
-        return position ? position.name : 'Unknown Position';
-    };
-
-    const getCandidateName = (candidateId) => {
-        const candidate = candidates.find((c) => c.id === candidateId);
-        return candidate ? candidate.name : 'Unknown Candidate';
+    const handleLogout = async () => {
+        try {
+            await post(route('logout')); // Log out the user
+            window.location.href = '/'; // Redirect to Welcome.jsx (assuming '/' is the route for Welcome.jsx)
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
-            <Head title="Voting Results" />
+            <Head title="Welcome" />
 
+            {/* Navbar */}
             <nav className="bg-transparent text-white shadow-lg border-b-4 border-green-300 transition duration-500 ease-in-out transform hover:scale-105">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col sm:flex-row justify-between items-center">
+                        {/* Title */}
                         <h2 className="text-3xl font-extrabold text-green-100 tracking-wide">
                             Mindoro State University Voting System
                         </h2>
-                        <button className="sm:hidden text-white text-2xl">
+
+                        {/* Hamburger Icon */}
+                        <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="sm:hidden text-white text-2xl"
+                        >
                             <FaBars />
                         </button>
 
-                        <div className="flex flex-col sm:flex-row items-center gap-6 mt-4 sm:mt-0 sm:flex">
+                        {/* Navigation Links */}
+                        <div
+                            className={`flex flex-col sm:flex-row items-center gap-6 mt-4 sm:mt-0 sm:flex ${isMenuOpen ? 'block' : 'hidden'}`}
+                        >
                             <Link
                                 href={route('subdashboard')}
                                 className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
@@ -99,7 +77,10 @@ export default function Result() {
                             >
                                 <FaChalkboardTeacher className="text-xl" /> Result
                             </Link>
-                            <button className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300">
+                            <button
+                                onClick={handleLogout}
+                                className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
+                            >
                                 <FaSignOutAlt className="text-xl" /> Logout
                             </button>
                         </div>
@@ -107,32 +88,23 @@ export default function Result() {
                 </div>
             </nav>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <h2 className="text-2xl font-bold text-white mb-4">Vote Results</h2>
-                <table className="min-w-full table-auto bg-white text-gray-800 rounded-lg shadow-lg">
-                    <thead>
-                        <tr>
-                            <th className="px-4 py-2 border-b text-left">Voter ID</th>
-                            <th className="px-4 py-2 border-b text-left">Position</th>
-                            <th className="px-4 py-2 border-b text-left">Candidate</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {votes.length === 0 ? (
-                            <tr>
-                                <td colSpan="3" className="px-4 py-2 text-center">No votes recorded</td>
-                            </tr>
-                        ) : (
-                            votes.map((vote) => (
-                                <tr key={vote.id}>
-                                    <td className="px-4 py-2 border-b">{vote.voter_id}</td>
-                                    <td className="px-4 py-2 border-b">{vote.position.name}</td>
-                                    <td className="px-4 py-2 border-b">{vote.candidate.name}</td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+            {/* Main Content */}
+            <div className="py-12">
+                <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">
+                    <div className="overflow-hidden bg-white shadow-xl sm:rounded-lg border-t-4 border-green-500">
+                        <div className="p-8 text-gray-900">
+                            <h3 className="text-2xl font-medium text-green-600 mb-6">
+                                Results
+                            </h3>
+                            <div className="mt-6 space-y-4">
+                                <div className="text-green-700 text-lg font-semibold">
+                                    <p className="text-xl font-semibold">Election ID:</p>
+                                    <p className="text-gray-800 text-2xl">{electionId}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );

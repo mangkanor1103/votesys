@@ -32,7 +32,6 @@ export default function Welcome() {
         }
     };
 
-
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
             <Head title="Welcome" />
@@ -101,7 +100,7 @@ export default function Welcome() {
 
             {/* Main Content */}
             <div className="py-12">
-                <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-xl sm:rounded-lg border-t-4 border-green-500">
                         <div className="p-8 text-gray-900">
                             <h3 className="text-2xl font-medium text-green-600 mb-6">
@@ -110,23 +109,33 @@ export default function Welcome() {
                             <p className="text-gray-600 text-lg">
                                 Please proceed to manage elections, voters, and candidates efficiently.
                             </p>
-                            <div className="mt-6 space-y-4">
+
+                            {/* Election Details (using grid for responsiveness) */}
+                            <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="text-green-700 text-lg font-semibold">
                                     <p className="text-xl font-semibold">Election Code:</p>
                                     <p className="text-gray-800 text-2xl">{electionCode}</p>
-                                </div>
-                                <div className="text-green-700 text-lg font-semibold">
-                                    <p className="text-xl font-semibold">Election ID:</p>
-                                    <p className="text-gray-800 text-2xl">{electionId}</p>
                                 </div>
                                 <div className="text-green-700 text-lg font-semibold">
                                     <p className="text-xl font-semibold">Election Name:</p>
                                     <p className="text-gray-800 text-2xl">{electionName}</p>
                                 </div>
                                 <div className="text-green-700 text-lg font-semibold">
+                                    <p className="text-xl font-semibold">Election ID:</p>
+                                    <p className="text-gray-800 text-2xl">{electionId}</p>
+                                </div>
+                                <div className="text-green-700 text-lg font-semibold">
                                     <p className="text-xl font-semibold">Election Date:</p>
                                     <p className="text-gray-800 text-2xl">{electionDate}</p>
                                 </div>
+                            </div>
+
+                            {/* About the Mindoro State University Online Voting System */}
+                            <div className="mt-8">
+                                <h4 className="text-xl font-semibold text-green-600">About the Voting System</h4>
+                                <p className="text-gray-600 text-lg mt-4">
+                                    The Mindoro State University Online Voting System provides a secure and efficient way for students to participate in the student council elections. This system allows voters to cast their votes online, ensuring accessibility and convenience. It incorporates robust encryption methods for security and features a user-friendly interface, making the voting process seamless and reliable.
+                                </p>
                             </div>
                         </div>
                     </div>
