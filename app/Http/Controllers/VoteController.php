@@ -34,18 +34,29 @@ class VoteController extends Controller
     }
 
     // Store vote method (unchanged)
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'voter_id' => 'required|exists:voters,id',
-            'election_id' => 'required|exists:elections,id',
-            'votes' => 'required|array',
-            'votes.*.position_id' => 'required|exists:positions,id',
-            'votes.*.candidate_id' => 'required|exists:candidates,id',
-        ]);
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'voter_id' => 'required|exists:voters,id',
+        'election_id' => 'required|exists:elections,id',
+        'votes' => 'required|array',
+        'votes.*.position_id' => 'required|exists:positions,id',
+        'votes.*.candidate_id' => 'required|exists:candidates,id',
+    ]);
 
+    try {
         DB::transaction(function () use ($validated) {
             foreach ($validated['votes'] as $vote) {
+                // Check if the voter has already voted for this position
+                $existingVote = Vote::where('voter_id', $validated['voter_id'])
+                                    ->where('position_id', $vote['position_id'])
+                                    ->where('election_id', $validated['election_id'])
+                                    ->exists();
+
+                if ($existingVote) {
+                    return back()->withErrors(['msg' => 'You have already voted for this position.']);
+                }
+
                 Vote::updateOrCreate(
                     [
                         'voter_id' => $validated['voter_id'],
@@ -57,6 +68,10 @@ class VoteController extends Controller
             }
         });
 
-        return redirect()->route('vote.thanks'); // Redirect to a Thank You page
+        return redirect()->route('vote.thanks');
+    } catch (\Exception $e) {
+        return back()->withErrors(['msg' => 'An error occurred while submitting your vote. Please try again later.']);
     }
+}
+
 }

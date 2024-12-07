@@ -46,7 +46,6 @@ export default function ManageVoters() {
                 number_of_codes: numCodes,
             });
 
-            // Replace alert with SweetAlert2 notification
             Swal.fire({
                 title: 'Success!',
                 text: 'Voter codes generated successfully!',
@@ -128,22 +127,28 @@ export default function ManageVoters() {
                 <div className="mx-auto max-w-6xl sm:px-6 lg:px-8">
                     <div className="bg-white shadow-2xl sm:rounded-lg border-t-4 border-green-500">
                         <div className="p-10">
+                            {/* Title Section */}
                             <h3 className="text-3xl font-semibold text-green-700 mb-6">Generate Voter Codes</h3>
+
+                            {/* Error Messages */}
+                            {errors.length > 0 && (
+                                <div className="text-red-500 mb-4">
+                                    {errors.join(', ')}
+                                </div>
+                            )}
+
+                            {/* Form Section */}
                             <form onSubmit={handleGenerateCodes}>
-                                {/* Election ID Section */}
                                 <div className="mb-8">
-                                    <input                                        id="electionId"
+                                    <input
+                                        id="electionId"
                                         type="hidden"
                                         value={electionId}
-                                        onChange={(e) => setElectionId(e.target.value)}
                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-500 transition duration-300"
-                                        required
                                         readOnly
-                                        disabled
                                     />
                                 </div>
 
-                                {/* Number of Codes Section */}
                                 <div className="mb-8">
                                     <label htmlFor="numCodes" className="block text-lg text-gray-600 font-medium mb-2">
                                         Number of Voter Codes to Generate:
@@ -156,11 +161,10 @@ export default function ManageVoters() {
                                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-500 transition duration-300"
                                         required
                                     />
-                                    {errors.length > 0 && <div className="text-red-500 mt-2">{errors.join(', ')}</div>}
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className="flex space-x-6 justify-between">
+                                <div className="flex space-x-6 justify-center">
                                     <button
                                         type="submit"
                                         className="w-1/2 px-6 py-3 bg-green-700 text-white rounded-lg hover:bg-green-800 transition duration-300"
@@ -194,7 +198,6 @@ export default function ManageVoters() {
                     </div>
                 </div>
             </div>
-
         </div>
     );
 }
