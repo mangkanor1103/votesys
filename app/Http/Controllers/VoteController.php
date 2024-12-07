@@ -45,15 +45,13 @@ class VoteController extends Controller
         ]);
     }
 
-public function index($electionId)
-{
-    $votes = Vote::where('election_id', $electionId)
-                 ->with(['position', 'candidate'])
-                 ->get();
+    public function index($electionId)
+    {
+        $votes = Vote::where('election_id', $electionId)
+                     ->with(['position', 'candidate'])
+                     ->get();
 
-    return response()->json(['votes' => $votes]);
-}
-
-
+        return response()->json(['votes' => $votes]);
+    }
 
 }
