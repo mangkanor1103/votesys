@@ -9,11 +9,9 @@ export default function Welcome() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
-        // Fetch election details from localStorage
         const storedElectionId = localStorage.getItem('election_id');
         setElectionId(storedElectionId || 'N/A');
 
-        // Fetch the votes for the election
         if (storedElectionId) {
             fetchVotes(storedElectionId);
         }
@@ -21,10 +19,9 @@ export default function Welcome() {
 
     const fetchVotes = async (electionId) => {
         try {
-            const response = await fetch(`/api/votes/${electionId}`);  // Adjust your API endpoint accordingly
+            const response = await fetch(`/api/votes/${electionId}`);
             const data = await response.json();
 
-            // Ensure the response contains votes data
             if (data && data.votes) {
                 setVotes(data.votes);
             } else {
@@ -37,25 +34,31 @@ export default function Welcome() {
 
     const handleLogout = async () => {
         try {
-            await post(route('logout')); // Log out the user
-            window.location.href = '/'; // Redirect to Welcome.jsx (assuming '/' is the route for Welcome.jsx)
+            await post(route('logout'));
+            window.location.href = '/';
         } catch (error) {
             console.error("Logout failed:", error);
         }
     };
 
-    // Group votes by position_id and count occurrences of each candidate_id
     const groupedVotes = votes.reduce((acc, vote) => {
         if (!acc[vote.position_id]) {
             acc[vote.position_id] = {};
         }
 
-        // Count the votes for each candidate
         if (!acc[vote.position_id][vote.candidate_id]) {
             acc[vote.position_id][vote.candidate_id] = 0;
         }
         acc[vote.position_id][vote.candidate_id] += 1;
 
+        return acc;
+    }, {});
+
+    const positionMap = votes.reduce((acc, vote) => {
+        const position = vote.position_id && vote.position.name;
+        if (position) {
+            acc[vote.position_id] = position;
+        }
         return acc;
     }, {});
 
@@ -67,12 +70,10 @@ export default function Welcome() {
             <nav className="bg-transparent text-white shadow-lg border-b-4 border-green-300 transition duration-500 ease-in-out transform hover:scale-105">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col sm:flex-row justify-between items-center">
-                        {/* Title */}
                         <h2 className="text-3xl font-extrabold text-green-100 tracking-wide">
                             Mindoro State University Voting System
                         </h2>
 
-                        {/* Hamburger Icon */}
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="sm:hidden text-white text-2xl"
@@ -80,7 +81,6 @@ export default function Welcome() {
                             <FaBars />
                         </button>
 
-                        {/* Navigation Links */}
                         <div
                             className={`flex flex-col sm:flex-row items-center gap-6 mt-4 sm:mt-0 sm:flex ${isMenuOpen ? 'block' : 'hidden'}`}
                         >
@@ -143,33 +143,46 @@ export default function Welcome() {
                                         Object.keys(groupedVotes).map((positionId) => {
                                             const candidateVotes = groupedVotes[positionId];
                                             const maxVotes = Math.max(...Object.values(candidateVotes));
-                                            const winningCandidate = Object.keys(candidateVotes).find(
+                                            const winningCandidateId = Object.keys(candidateVotes).find(
                                                 (candidateId) => candidateVotes[candidateId] === maxVotes
+                                            );
+                                            // Find the winning candidate's name
+                                            const winningCandidate = votes.find(
+                                                (vote) => vote.candidate_id == winningCandidateId
                                             );
 
                                             return (
                                                 <div key={positionId} className="bg-gray-100 p-4 rounded-lg shadow-md">
                                                     <h4 className="text-xl font-semibold text-green-700">
-                                                        Position ID: {positionId}
+                                                        Position Name: {positionMap[positionId] || 'N/A'}
                                                     </h4>
                                                     <table className="min-w-full mt-4">
                                                         <thead>
                                                             <tr>
-                                                                <th className="border px-4 py-2 text-left">Candidate ID</th>
+                                                                <th className="border px-4 py-2 text-left">Candidate Name</th>
+                                                                <th className="border px-4 py-2 text-left">Position</th>
                                                                 <th className="border px-4 py-2 text-left">Vote Count</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            {Object.keys(candidateVotes).map((candidateId) => (
-                                                                <tr key={candidateId}>
-                                                                    <td className="border px-4 py-2">{candidateId}</td>
-                                                                    <td className="border px-4 py-2">{candidateVotes[candidateId]}</td>
-                                                                </tr>
-                                                            ))}
+                                                            {Object.keys(candidateVotes).map((candidateId) => {
+                                                                const candidate = votes.find(vote => vote.candidate_id == candidateId);
+                                                                // Only render if the candidate exists and has a valid name
+                                                                if (candidate && candidate.candidate.name) {
+                                                                    return (
+                                                                        <tr key={candidateId}>
+                                                                            <td className="border px-4 py-2">{candidate.candidate.name}</td>
+                                                                            <td className="border px-4 py-2">{positionMap[positionId] || 'N/A'}</td>
+                                                                            <td className="border px-4 py-2">{candidateVotes[candidateId]}</td>
+                                                                        </tr>
+                                                                    );
+                                                                }
+                                                                return null;
+                                                            })}
                                                         </tbody>
                                                     </table>
                                                     <p className="mt-4 text-lg font-semibold text-green-800">
-                                                        Winning Candidate ID: {winningCandidate} with {maxVotes} votes
+                                                        Winning Candidate: {winningCandidate?.candidate.name || 'N/A'} with {maxVotes} votes
                                                     </p>
                                                 </div>
                                             );

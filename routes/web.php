@@ -16,6 +16,7 @@ use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\ElectionResultController;
 use App\Http\Controllers\UserController;
+Route::get('/api/votes/{electionId}', [VoteController::class, 'getVotesByElection']);
 
 Route::get('/voter/dashboard', [VoteController::class, 'showDashboard'])->name('voter.dashboard');
 
