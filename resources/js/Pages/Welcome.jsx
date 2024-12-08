@@ -30,18 +30,14 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
         post(route('voter.login'), {
             data: { voter_code: data.voter_code },
             onSuccess: () => {
-                // Assuming 'id', 'name', and 'date' are available in the scope
                 const { id, name, date } = yourElectionData; // Replace 'yourElectionData' with the actual object holding these values
                 window.location.href = `/voter/dashboard/${id}?election_name=${name}&election_date=${date}`;
             },
             onError: (errors) => {
-                // Handle error, display error message if any
                 setError(errors.voter_code || 'An error occurred. Please try again.');
             },
         });
     };
-
-
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
@@ -116,6 +112,26 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                             <FaChalkboardTeacher className="text-xl" /> Super Admin
                         </Link>
                     </CSSTransition>
+
+                    {/* Student Button */}
+                    <Link
+                        href={route('student')} // Adjust the route to match your setup
+                        className={`text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'student' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+                        onMouseEnter={() => handleHover('student')}
+                        onMouseLeave={handleLeave}
+                    >
+                        <FaHome className="text-xl" /> Student
+                    </Link>
+
+                    {/* Not Student Button */}
+                    <Link
+                        href={route('not_student')} // Adjust the route to match your setup
+                        className={`text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'notStudent' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+                        onMouseEnter={() => handleHover('notStudent')}
+                        onMouseLeave={handleLeave}
+                    >
+                        <FaSignOutAlt className="text-xl" /> Not Student
+                    </Link>
                 </div>
 
                 {/* Contact Information */}

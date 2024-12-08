@@ -109,6 +109,13 @@ Route::delete('/elections/{id}', [ElectionController::class, 'destroy'])->name('
 // Define the route for elections.index
 Route::get('/elections', [ElectionController::class, 'index'])->name('elections.index');
 
+Route::get('/student', function () {
+    return inertia('Student'); // Render Student.jsx
+})->name('student');
+
+Route::get('/not-student', function () {
+    return inertia('NotStudent'); // Render NotStudent.jsx
+})->name('not_student');
 
 Route::get('/subdashboard', function () {
     return Inertia::render('SubAdmin/SubDashboard');

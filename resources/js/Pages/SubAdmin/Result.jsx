@@ -5,12 +5,15 @@ import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt, FaBars }
 export default function Welcome() {
     const { post } = useForm();
     const [electionId, setElectionId] = useState('');
+    const [electionName, setElectionName] = useState('');
     const [votes, setVotes] = useState([]);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     useEffect(() => {
         const storedElectionId = localStorage.getItem('election_id');
+        const storedElectionName = localStorage.getItem('election_name');
         setElectionId(storedElectionId || 'N/A');
+        setElectionName(storedElectionName || 'N/A');
 
         if (storedElectionId) {
             fetchVotes(storedElectionId);
@@ -134,9 +137,9 @@ export default function Welcome() {
                                 Results
                             </h3>
                             <div className="mt-6 space-y-4">
-                                <div className="text-green-700 text-lg font-semibold">
-                                    <p className="text-xl font-semibold">Election ID:</p>
-                                    <p className="text-gray-800 text-2xl">{electionId}</p>
+                            <div className="text-green-700 text-lg font-semibold">
+                                    <p className="text-xl font-semibold">Election Name:</p>
+                                    <p className="text-gray-800 text-2xl">{electionName}</p>
                                 </div>
                                 <div className="space-y-4 mt-6">
                                     {Object.keys(groupedVotes).length > 0 ? (
