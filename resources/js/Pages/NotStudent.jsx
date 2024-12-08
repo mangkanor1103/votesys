@@ -1,21 +1,33 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // Install axios if not already installed
 import { Head } from '@inertiajs/react';
 
 export default function NotStudent() {
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [formData, setFormData] = useState({
+        school_id: '',
+        name: '',
+        department: '',
+        password: '',
+    });
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
-    const handleRegister = (e) => {
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value,
+        });
+    };
+
+    const handleRegister = async (e) => {
         e.preventDefault();
 
-        // Check if passwords match
-        if (password !== confirmPassword) {
-            setError('Passwords do not match');
-        } else {
+        try {
+            const response = await axios.post('/student-verification', formData);
+            setSuccess(response.data.message);
             setError('');
-            // Proceed with registration logic
-            console.log('Registration successful');
+        } catch (err) {
+            setError(err.response?.data?.message || 'An error occurred');
         }
     };
 
@@ -38,6 +50,8 @@ export default function NotStudent() {
                             type="text"
                             id="school-id"
                             name="school_id"
+                            value={formData.school_id}
+                            onChange={handleChange}
                             placeholder="Enter your school ID"
                             className="w-full px-4 py-3 border-2 border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-300"
                         />
@@ -52,6 +66,8 @@ export default function NotStudent() {
                             type="text"
                             id="name"
                             name="name"
+                            value={formData.name}
+                            onChange={handleChange}
                             placeholder="Enter your full name"
                             className="w-full px-4 py-3 border-2 border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-300"
                         />
@@ -66,6 +82,8 @@ export default function NotStudent() {
                             type="text"
                             id="department"
                             name="department"
+                            value={formData.department}
+                            onChange={handleChange}
                             placeholder="Enter your department"
                             className="w-full px-4 py-3 border-2 border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-300"
                         />
@@ -80,31 +98,16 @@ export default function NotStudent() {
                             type="password"
                             id="password"
                             name="password"
+                            value={formData.password}
+                            onChange={handleChange}
                             placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
                             className="w-full px-4 py-3 border-2 border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-300"
                         />
                     </div>
 
-                    {/* Confirm Password Input */}
-                    <div className="mb-6">
-                        <label htmlFor="confirm-password" className="block text-green-800 font-semibold mb-2">
-                            Confirm Password:
-                        </label>
-                        <input
-                            type="password"
-                            id="confirm-password"
-                            name="confirm_password"
-                            placeholder="Confirm your password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full px-4 py-3 border-2 border-green-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-300"
-                        />
-                    </div>
-
-                    {/* Error Message */}
+                    {/* Error or Success Message */}
                     {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+                    {success && <p className="text-green-600 text-sm mb-4">{success}</p>}
 
                     {/* Register Button */}
                     <button

@@ -16,6 +16,14 @@ use App\Http\Controllers\VoterController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\ElectionResultController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\StudentVerificationController;
+
+Route::post('/student-verification', [StudentVerificationController::class, 'store']);
+
+
+Route::post('/register-student', [StudentController::class, 'store']);
+
 Route::get('/api/votes/{electionId}', [VoteController::class, 'getVotesByElection']);
 
 Route::get('/voter/dashboard', [VoteController::class, 'showDashboard'])->name('voter.dashboard');
