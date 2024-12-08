@@ -18,13 +18,17 @@ class StudentVerificationController extends Controller
         ]);
 
         // Store in database
-        Student::create([
+        $student = Student::create([
             'school_id' => $request->school_id,
             'name' => $request->name,
             'department' => $request->department,
             'password' => Hash::make($request->password), // Hash the password
         ]);
 
-        return response()->json(['message' => 'Registration successful'], 201);
+        // Return a success message along with a redirect URL
+        return response()->json([
+            'message' => 'Registration successful',
+            'redirect_url' => route('student.dashboard') // Assuming you have a route for StuDashboard
+        ], 201);
     }
 }
