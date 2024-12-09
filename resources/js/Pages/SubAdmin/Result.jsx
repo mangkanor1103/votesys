@@ -1,6 +1,10 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
 import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt, FaBars } from 'react-icons/fa';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function Welcome() {
     const { post } = useForm();
@@ -8,6 +12,7 @@ export default function Welcome() {
     const [electionName, setElectionName] = useState('');
     const [votes, setVotes] = useState([]);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [chartData, setChartData] = useState({}); // For chart data
 
     useEffect(() => {
         const storedElectionId = localStorage.getItem('election_id');
@@ -27,6 +32,7 @@ export default function Welcome() {
 
             if (data && data.votes) {
                 setVotes(data.votes);
+                formatChartData(data.votes); // Process chart data
             } else {
                 console.error("Votes data not available or malformed.");
             }
@@ -65,6 +71,54 @@ export default function Welcome() {
         return acc;
     }, {});
 
+    // Format the chart data
+    const formatChartData = (votes) => {
+        const data = {
+            labels: [], // Candidate names
+            datasets: [] // Votes count
+        };
+
+        // Assuming you want to show one chart per position
+        const positionVotes = {};
+
+        votes.forEach((vote) => {
+            const position = positionMap[vote.position_id];
+            const candidateName = vote.candidate.name;
+
+            if (!positionVotes[position]) {
+                positionVotes[position] = {
+                    labels: [],
+                    votes: []
+                };
+            }
+
+            if (!positionVotes[position].labels.includes(candidateName)) {
+                positionVotes[position].labels.push(candidateName);
+                positionVotes[position].votes.push(1); // Initialize vote count
+            } else {
+                const index = positionVotes[position].labels.indexOf(candidateName);
+                positionVotes[position].votes[index] += 1; // Increment vote count
+            }
+        });
+
+        // Create a separate chart for each position
+        const chartDataArr = Object.keys(positionVotes).map((position) => ({
+            positionName: position,
+            data: {
+                labels: positionVotes[position].labels,
+                datasets: [{
+                    label: position,
+                    data: positionVotes[position].votes,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                }],
+            },
+        }));
+
+        setChartData(chartDataArr); // Set chart data for each position
+    };
+
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
             <Head title="Welcome" />
@@ -76,7 +130,6 @@ export default function Welcome() {
                         <h2 className="text-3xl font-extrabold text-green-100 tracking-wide">
                             Mindoro State University Voting System
                         </h2>
-
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="sm:hidden text-white text-2xl"
@@ -117,12 +170,12 @@ export default function Welcome() {
                             >
                                 <FaChalkboardTeacher className="text-xl" /> Result
                             </Link>
-                            <button
-                                onClick={handleLogout}
+                            <Link
+                                href={route('welcome')}
                                 className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
                             >
-                                <FaSignOutAlt className="text-xl" /> Logout
-                            </button>
+                                <FaChalkboardTeacher className="text-xl" /> Logout
+                            </Link>
                         </div>
                     </div>
                 </div>
@@ -137,10 +190,32 @@ export default function Welcome() {
                                 Results
                             </h3>
                             <div className="mt-6 space-y-4">
-                            <div className="text-green-700 text-lg font-semibold">
+                                <div className="text-green-700 text-lg font-semibold">
                                     <p className="text-xl font-semibold">Election Name:</p>
                                     <p className="text-gray-800 text-2xl">{electionName}</p>
                                 </div>
+
+                                {/* Chart Section */}
+                                <div className="mt-6">
+                                    {chartData.length > 0 && chartData.map((positionData, index) => (
+                                        <div key={index} className="mt-6">
+                                            <h4 className="text-lg font-semibold text-green-700">
+                                                {positionData.positionName}
+                                            </h4>
+                                            <Bar data={positionData.data} options={{
+                                                responsive: true,
+                                                plugins: {
+                                                    title: {
+                                                        display: true,
+                                                        text: `${positionData.positionName} Election Results`,
+                                                    },
+                                                },
+                                            }} />
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Display results table */}
                                 <div className="space-y-4 mt-6">
                                     {Object.keys(groupedVotes).length > 0 ? (
                                         Object.keys(groupedVotes).map((positionId) => {
@@ -149,7 +224,6 @@ export default function Welcome() {
                                             const winningCandidateId = Object.keys(candidateVotes).find(
                                                 (candidateId) => candidateVotes[candidateId] === maxVotes
                                             );
-                                            // Find the winning candidate's name
                                             const winningCandidate = votes.find(
                                                 (vote) => vote.candidate_id == winningCandidateId
                                             );
@@ -165,18 +239,19 @@ export default function Welcome() {
                                                                 <th className="border px-4 py-2 text-left">Candidate Name</th>
                                                                 <th className="border px-4 py-2 text-left">Position</th>
                                                                 <th className="border px-4 py-2 text-left">Vote Count</th>
+                                                                <th className="border px-4 py-2 text-left">Winner</th>
                                                             </tr>
                                                         </thead>
                                                         <tbody>
                                                             {Object.keys(candidateVotes).map((candidateId) => {
                                                                 const candidate = votes.find(vote => vote.candidate_id == candidateId);
-                                                                // Only render if the candidate exists and has a valid name
                                                                 if (candidate && candidate.candidate.name) {
                                                                     return (
                                                                         <tr key={candidateId}>
                                                                             <td className="border px-4 py-2">{candidate.candidate.name}</td>
-                                                                            <td className="border px-4 py-2">{positionMap[positionId] || 'N/A'}</td>
+                                                                            <td className="border px-4 py-2">{positionMap[positionId]}</td>
                                                                             <td className="border px-4 py-2">{candidateVotes[candidateId]}</td>
+                                                                            <td className="border px-4 py-2">{winningCandidateId === candidateId ? 'Winner' : ''}</td>
                                                                         </tr>
                                                                     );
                                                                 }
@@ -184,14 +259,11 @@ export default function Welcome() {
                                                             })}
                                                         </tbody>
                                                     </table>
-                                                    <p className="mt-4 text-lg font-semibold text-green-800">
-                                                        Winning Candidate: {winningCandidate?.candidate.name || 'N/A'} with {maxVotes} votes
-                                                    </p>
                                                 </div>
                                             );
                                         })
                                     ) : (
-                                        <p>No votes found for this election.</p>
+                                        <p>No votes cast yet.</p>
                                     )}
                                 </div>
                             </div>

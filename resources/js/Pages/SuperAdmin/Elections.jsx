@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaVoteYea, FaEdit, FaTrash } from 'react-icons/fa'; 
+import { FaVoteYea, FaEdit, FaTrash } from 'react-icons/fa';
 import InputError from "@/Components/InputError";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { Head, useForm } from "@inertiajs/react";
@@ -17,33 +17,37 @@ export default function Elections({ auth, elections }) {
     const [electionsList, setElectionsList] = useState(elections);
 
     // Handle Submit (Create or Update Election)
-    const submit = (e) => {
-        e.preventDefault(); // Prevent page refresh
-    
+
+    const submit = (e) => { Swal.fire({
+        icon: 'success',
+        title: 'Election Created Successfully!',
+        text: 'The new election has been successfully added to the system.',
+    });
+
         if (editingElection) {
-            handleUpdate();
+            handleUpdate(); // Handle updating the election if editing
         } else {
             // Send post request to store new election
             post(route('election.store'), {
                 data: { election_name: data.election_name, election_date: data.election_date },
                 onSuccess: (response) => {
                     console.log("Response after creating election:", response); // Debug log to check the response
-    
+
                     if (response.props && response.props.election) {
                         const newElection = response.props.election;
                         console.log("New election object:", newElection); // Debug log for new election
-    
+
                         // Update elections list immediately with the new election
                         setElectionsList(prevElections => [...prevElections, newElection]);
-    
-                        // Show success notification after creating election
+
+                        // Show success notification after creating the election
                         Swal.fire({
                             icon: 'success',
-                            title: 'Election Created!',
-                            text: 'The new election has been added successfully.',
+                            title: 'Election Created Successfully!',
+                            text: 'The new election has been successfully added to the system.',
                         });
                     } else {
-                        console.error('New election not returned in response.');
+                        console.error('New election data not returned in the response.');
                     }
                     reset(); // Reset form data after successful submission
                 },
@@ -53,8 +57,9 @@ export default function Elections({ auth, elections }) {
             });
         }
     };
-    
-    
+
+
+
 
     // Handle Edit Election
     const handleEdit = (election) => {
