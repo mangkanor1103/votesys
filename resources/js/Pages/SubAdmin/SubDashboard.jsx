@@ -23,14 +23,6 @@ export default function Welcome() {
         setElectionDate(storedElectionDate || 'N/A');
     }, []);
 
-    const handleLogout = async () => {
-        try {
-            await post(route('logout')); // Log out the user
-            window.location.href = '/'; // Redirect to Welcome.jsx (assuming '/' is the route for Welcome.jsx)
-        } catch (error) {
-            console.error("Logout failed:", error);
-        }
-    };
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
@@ -87,12 +79,12 @@ export default function Welcome() {
                             >
                                 <FaChalkboardTeacher className="text-xl" /> Result
                             </Link>
-                            <button
-                                onClick={handleLogout}
+                            <Link
+                                href={route('welcome')}
                                 className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
                             >
-                                <FaSignOutAlt className="text-xl" /> Logout
-                            </button>
+                                <FaChalkboardTeacher className="text-xl" /> Logout
+                            </Link>
                         </div>
                     </div>
                 </div>

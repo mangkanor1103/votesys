@@ -170,12 +170,12 @@ export default function Welcome() {
                             >
                                 <FaChalkboardTeacher className="text-xl" /> Result
                             </Link>
-                            <button
-                                onClick={handleLogout}
+                            <Link
+                                href={route('welcome')}
                                 className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
                             >
-                                <FaSignOutAlt className="text-xl" /> Logout
-                            </button>
+                                <FaChalkboardTeacher className="text-xl" /> Logout
+                            </Link>
                         </div>
                     </div>
                 </div>
