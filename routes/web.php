@@ -18,7 +18,7 @@ use App\Http\Controllers\StudentVerificationController;
 
 Route::post('/candidates/{id}', [CandidateController::class, 'update']);
 
-Route::get('/elections', [ElectionController::class, 'index']);
+Route::get('/elections', [ElectionController::class, 'index'])->name('elections.index');
 
 Route::get('/StuDashboard', function () {
     return Inertia::render('StuDashboard');

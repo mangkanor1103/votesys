@@ -15,11 +15,23 @@ class ElectionController extends Controller
      *
      * @return \Inertia\Response
      */
-    public function index()
-    {
-        $elections = Election::all(); // Fetch all elections
-        return response()->json($elections); // Return elections as JSON
+    public function index(Request $request)
+{
+    // Fetch all elections from the database
+    $elections = Election::all();
+
+    // Check if the request expects a JSON response (e.g., from the Student Dashboard)
+    if ($request->wantsJson()) {
+        return response()->json($elections); // Return JSON response for API calls
     }
+
+    // Return the view with the elections data using Inertia for normal requests
+    return Inertia::render('SuperAdmin/Elections', [
+        'elections' => $elections,
+    ]);
+}
+
+
     
     public function getPositions($electionId)
 {
