@@ -17,16 +17,10 @@ class ElectionController extends Controller
      */
     public function index()
     {
-        // Fetch all elections from the database
-        $elections = Election::all();
-
-        // Return the view with the elections data
-        return Inertia::render('SuperAdmin/Elections', [
-            'elections' => $elections,
-        ]);
-
-        
+        $elections = Election::all(); // Fetch all elections
+        return response()->json($elections); // Return elections as JSON
     }
+    
     public function getPositions($electionId)
 {
     $election = Election::with('positions')->findOrFail($electionId);
