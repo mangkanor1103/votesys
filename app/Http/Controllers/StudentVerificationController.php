@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Student;
+use Illuminate\Support\Facades\DB;
+
 
 class StudentVerificationController extends Controller
 {
@@ -31,4 +33,25 @@ class StudentVerificationController extends Controller
             'redirect' => '/student', // The route to redirect after successful registration
         ], 201);
     }
+
+
+    public function login(Request $request)
+{
+    $request->validate([
+        'school_id' => 'required',
+        'password' => 'required',
+    ]);
+
+    $student = DB::table('students')->where('school_id', $request->school_id)->first();
+
+    if ($student && Hash::check($request->password, $student->password)) {
+        return response()->json(['success' => true]); // Confirm this response
+    }
+
+    return response()->json(['success' => false, 'message' => 'Invalid credentials.'], 401);
+}
+
+
+    
+
 }

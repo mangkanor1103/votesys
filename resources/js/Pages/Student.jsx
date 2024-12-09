@@ -1,7 +1,41 @@
-import React from 'react';
+import React, { useState } from 'react';
+import axios from 'axios'; // Make sure axios is installed
 import { Head } from '@inertiajs/react';
+import { Inertia } from '@inertiajs/inertia';
 
 export default function Student() {
+    const [formData, setFormData] = useState({
+        school_id: '',
+        password: '',
+    });
+    const [error, setError] = useState('');
+
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value,
+        });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+    
+        try {
+            const response = await axios.post('/student-login', formData);
+            console.log('Login Response:', response.data); // Debug response
+    
+            if (response.data.success) {
+                window.location.href = '/StuDashboard';
+            } else {
+                setError(response.data.message || 'Invalid credentials, please try again.');
+            }
+        } catch (err) {
+            console.error('Login Error:', err.response?.data || err.message);
+            setError(err.response?.data?.message || 'An error occurred during login.');
+        }
+    };
+    
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-green-200 to-green-500 flex flex-col justify-center items-center">
             <Head title="Student Login" />
@@ -10,7 +44,7 @@ export default function Student() {
                 Please enter your credentials to access your student dashboard.
             </p>
             <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-lg">
-                <form>
+                <form onSubmit={handleSubmit}>
                     {/* School ID Input */}
                     <div className="mb-4">
                         <label htmlFor="school-id" className="block text-green-800 font-bold mb-2">
@@ -20,6 +54,8 @@ export default function Student() {
                             type="text"
                             id="school-id"
                             name="school_id"
+                            value={formData.school_id}
+                            onChange={handleChange}
                             placeholder="Enter your school ID"
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                         />
@@ -34,10 +70,15 @@ export default function Student() {
                             type="password"
                             id="password"
                             name="password"
+                            value={formData.password}
+                            onChange={handleChange}
                             placeholder="Enter your password"
                             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
                         />
                     </div>
+
+                    {/* Error message */}
+                    {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
                     {/* Login Button */}
                     <button
