@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa';
-import { FaPen, FaTrashAlt } from 'react-icons/fa';
+import { FaTrashAlt, FaEdit } from 'react-icons/fa';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-
 
 export default function ManageCandidates({ positions, electionId, flash }) {
     const [positionsData, setPositionsData] = useState([]);
@@ -14,8 +13,12 @@ export default function ManageCandidates({ positions, electionId, flash }) {
     const [candidates, setCandidates] = useState([]);
     const [candidateName, setCandidateName] = useState('');
     const [candidatePlatform, setCandidatePlatform] = useState('');
-    const [candidatePhoto, setCandidatePhoto] = useState(null);
+    const [candidatePhoto, setCandidatePhoto] = useState('');
     const [editingCandidate, setEditingCandidate] = useState(null);
+    const [editName, setEditName] = useState('');
+    const [editPlatform, setEditPlatform] = useState('');
+    const [editPhoto, setEditPhoto] = useState(null);
+
 
     useEffect(() => {
         const storedElectionId = localStorage.getItem('election_id');
@@ -39,14 +42,13 @@ export default function ManageCandidates({ positions, electionId, flash }) {
     }, [electionId]);
 
     const fetchCandidates = (positionId) => {
-        // Check if the candidates are available in localStorage for the selected position
         const storedCandidates = localStorage.getItem(`candidates_${positionId}`);
         if (storedCandidates) {
             setCandidates(JSON.parse(storedCandidates));
         } else {
             axios.get(`/candidates/${positionId}`).then((response) => {
                 setCandidates(response.data);
-                localStorage.setItem(`candidates_${positionId}`, JSON.stringify(response.data));  // Store in localStorage
+                localStorage.setItem(`candidates_${positionId}`, JSON.stringify(response.data));
             }).catch((error) => {
                 console.error('Error fetching candidates:', error);
             });
@@ -76,14 +78,13 @@ export default function ManageCandidates({ positions, electionId, flash }) {
                 },
             });
 
-            // Update candidates both in state and localStorage
             const updatedCandidates = [...candidates, response.data];
             setCandidates(updatedCandidates);
             localStorage.setItem(`candidates_${selectedPosition}`, JSON.stringify(updatedCandidates));
 
             setCandidateName('');
             setCandidatePlatform('');
-            setCandidatePhoto(null);
+            setCandidatePhoto('');
         } catch (error) {
             console.error('Error adding candidate:', error);
             setError('An error occurred while adding the candidate.');
@@ -91,7 +92,6 @@ export default function ManageCandidates({ positions, electionId, flash }) {
     };
 
     const handleDeleteCandidate = async (candidateId) => {
-        // Show a confirmation dialog before deleting
         Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this action!",
@@ -103,15 +103,12 @@ export default function ManageCandidates({ positions, electionId, flash }) {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    // Proceed with the deletion if confirmed
                     await axios.delete(`/candidates/${candidateId}`);
-    
-                    // Update candidates both in state and localStorage
+
                     const updatedCandidates = candidates.filter(candidate => candidate.id !== candidateId);
                     setCandidates(updatedCandidates);
                     localStorage.setItem(`candidates_${selectedPosition}`, JSON.stringify(updatedCandidates));
-    
-                    // Show success message
+
                     Swal.fire('Deleted!', 'The candidate has been deleted.', 'success');
                 } catch (error) {
                     console.error('Error deleting candidate:', error);
@@ -121,45 +118,62 @@ export default function ManageCandidates({ positions, electionId, flash }) {
             }
         });
     };
-    
 
     const handleEditCandidate = (candidate) => {
         setEditingCandidate(candidate);
-        setCandidateName(candidate.name);
-        setCandidatePlatform(candidate.platform);
-        setCandidatePhoto(null);
+        setEditName(candidate.name);
+        setEditPlatform(candidate.platform);
+        setEditPhoto(null);
     };
 
     const handleUpdateCandidate = async () => {
         try {
             const formData = new FormData();
-            formData.append('name', candidateName);
-            formData.append('platform', candidatePlatform);
-            if (candidatePhoto) {
-                formData.append('photo', candidatePhoto);
+            formData.append('name', editName);
+            formData.append('platform', editPlatform);
+            if (editPhoto) {
+                formData.append('photo', editPhoto);
             }
-
-            const response = await axios.put(`/candidates/${editingCandidate.id}`, formData, {
+    
+            const response = await axios.post(`/candidates/${editingCandidate.id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-
+    
+            // Update the candidate list
             const updatedCandidates = candidates.map((candidate) =>
                 candidate.id === editingCandidate.id ? response.data : candidate
             );
             setCandidates(updatedCandidates);
             localStorage.setItem(`candidates_${selectedPosition}`, JSON.stringify(updatedCandidates));
-
+    
+            // Reset edit state
             setEditingCandidate(null);
-            setCandidateName('');
-            setCandidatePlatform('');
-            setCandidatePhoto(null);
+    
+            // Show success alert
+            Swal.fire({
+                icon: 'success',
+                title: 'Candidate Updated',
+                text: `${editName} has been successfully updated.`,
+                confirmButtonText: 'OK',
+            });
         } catch (error) {
             console.error('Error updating candidate:', error);
-            setError('An error occurred while updating the candidate.');
+    
+            // Show error alert
+            Swal.fire({
+                icon: 'error',
+                title: 'Update Failed',
+                text: 'An error occurred while updating the candidate. Please try again.',
+                confirmButtonText: 'OK',
+            });
         }
     };
+    
+    
+    
+    
 
     const getPositionName = (positionId) => {
         const position = positionsData.find((pos) => pos.id === Number(positionId));
@@ -254,38 +268,38 @@ export default function ManageCandidates({ positions, electionId, flash }) {
                                         <table className="mt-4 table-auto w-full border-collapse">
                                             <thead>
                                                 <tr className="bg-gray-100 text-left">
-                                                    <th className="px-4 py-2">Name</th>
-                                                    <th className="px-4 py-2">Platform</th>
-                                                    <th className="px-4 py-2">Photo</th>
-                                                    <th className="px-4 py-2">Actions</th>
+                                                    <th className="px-4 py-2 text-green-600">Candidate Name</th>
+                                                    <th className="px-4 py-2 text-green-600">Platform</th>
+                                                    <th className="px-4 py-2 text-green-600">Photo</th>
+                                                    <th className="px-4 py-2 text-green-600">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {candidates.map((candidate) => (
-                                                    <tr key={candidate.id}>
-                                                        <td className="border px-4 py-2">{candidate.name}</td>
-                                                        <td className="border px-4 py-2">{candidate.platform}</td>
-                                                        <td className="border px-4 py-2">
+                                                    <tr key={candidate.id} className="border-t">
+                                                        <td className="px-4 py-2">{candidate.name}</td>
+                                                        <td className="px-4 py-2">{candidate.platform}</td>
+                                                        <td className="px-4 py-2">
                                                             <img
                                                                 src={`/storage/${candidate.photo}`}
-                                                                alt="Candidate Photo"
-                                                                className="w-16 h-16 rounded-full object-cover"
+                                                                alt={candidate.name}
+                                                                className="h-16 w-16 object-cover rounded-full"
                                                             />
                                                         </td>
-                                                        <td className="border px-4 py-2">
-                                                            <button
-                                                                onClick={() => handleEditCandidate(candidate)}
-                                                                className="text-green-600 hover:text-green-800"
-                                                            >
-                                                                <FaPen />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleDeleteCandidate(candidate.id)}
-                                                                className="ml-4 text-red-600 hover:text-red-800"
-                                                            >
-                                                                <FaTrashAlt />
-                                                            </button>
-                                                        </td>
+                                                        <td className="px-4 py-2">
+    <button
+        onClick={() => handleEditCandidate(candidate)}
+        className="text-blue-500 hover:text-blue-700 mr-4"
+    >
+        <FaEdit /> {/* Replace text with the icon */}
+    </button>
+    <button
+        onClick={() => handleDeleteCandidate(candidate.id)}
+        className="text-red-500 hover:text-red-700"
+    >
+        <FaTrashAlt />
+    </button>
+</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -293,41 +307,49 @@ export default function ManageCandidates({ positions, electionId, flash }) {
                                     </div>
 
                                     <div className="mt-8">
-                                        <h4 className="text-xl font-semibold text-green-600">Add Candidate</h4>
-                                        <form className="mt-4" onSubmit={(e) => e.preventDefault()}>
-                                            <div className="mb-4">
-                                                <label className="block text-sm font-semibold text-gray-700">Candidate Name</label>
-                                                <input
-                                                    type="text"
-                                                    value={candidateName}
-                                                    onChange={(e) => setCandidateName(e.target.value)}
-                                                    className="mt-1 px-4 py-2 w-full border border-green-300 rounded-md"
-                                                />
-                                            </div>
-                                            <div className="mb-4">
-                                                <label className="block text-sm font-semibold text-gray-700">Platform</label>
-                                                <textarea
-                                                    value={candidatePlatform}
-                                                    onChange={(e) => setCandidatePlatform(e.target.value)}
-                                                    className="mt-1 px-4 py-2 w-full border border-green-300 rounded-md"
-                                                />
-                                            </div>
-                                            <div className="mb-4">
-                                                <label className="block text-sm font-semibold text-gray-700">Candidate Photo</label>
-                                                <input
-                                                    type="file"
-                                                    onChange={(e) => setCandidatePhoto(e.target.files[0])}
-                                                    className="mt-1 px-4 py-2 w-full border border-green-300 rounded-md"
-                                                />
-                                            </div>
-                                            <button
-                                                onClick={handleAddCandidate}
-                                                className="bg-green-600 text-white px-6 py-3 rounded-md hover:bg-green-800"
-                                            >
-                                                Add Candidate
-                                            </button>
-                                        </form>
-                                    </div>
+    <h4 className="text-xl font-semibold text-green-600">
+        {editingCandidate ? 'Edit Candidate' : 'Add New Candidate'}
+    </h4>
+    <div className="mt-4 space-y-4">
+        <input
+            type="text"
+            value={editingCandidate ? editName : candidateName}
+            onChange={(e) => editingCandidate ? setEditName(e.target.value) : setCandidateName(e.target.value)}
+            placeholder="Candidate Name"
+            className="w-full px-4 py-2 border border-green-300 rounded-md"
+        />
+        <textarea
+            value={editingCandidate ? editPlatform : candidatePlatform}
+            onChange={(e) => editingCandidate ? setEditPlatform(e.target.value) : setCandidatePlatform(e.target.value)}
+            placeholder="Platform"
+            className="w-full px-4 py-2 border border-green-300 rounded-md"
+        />
+        <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => editingCandidate ? setEditPhoto(e.target.files[0]) : setCandidatePhoto(e.target.files[0])}
+            className="w-full px-4 py-2 border border-green-300 rounded-md"
+        />
+        <div className="flex gap-4">
+    <button
+        onClick={editingCandidate ? handleUpdateCandidate : handleAddCandidate}
+        className="bg-green-600 text-white px-6 py-2 rounded-md"
+    >
+        {editingCandidate ? 'Update Candidate' : 'Add Candidate'}
+    </button>
+    {editingCandidate && (
+        <button
+            onClick={() => setEditingCandidate(null)}
+            className="bg-gray-500 text-white px-6 py-2 rounded-md"
+        >
+            Cancel
+        </button>
+    )}
+</div>
+
+    </div>
+</div>
+
                                 </>
                             )}
                         </div>

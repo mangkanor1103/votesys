@@ -43,33 +43,34 @@ class CandidateController extends Controller
 
     // Update an existing candidate
     public function update(Request $request, $id)
-    {
-        $candidate = Candidate::findOrFail($id);
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'platform' => 'required|string',
+        'photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    ]);
 
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'platform' => 'required|string|max:1000',
-            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Photo validation
-        ]);
+    $candidate = Candidate::findOrFail($id);
 
-        // Handle optional file upload
-        if ($request->hasFile('photo')) {
-            // Delete old photo if exists
-            if ($candidate->photo && Storage::disk('public')->exists($candidate->photo)) {
-                Storage::disk('public')->delete($candidate->photo);
-            }
+    $candidate->name = $request->input('name');
+    $candidate->platform = $request->input('platform');
 
-            $photoPath = $request->file('photo')->store('candidates', 'public');
-            $candidate->photo = $photoPath;
+    if ($request->hasFile('photo')) {
+        // Delete old photo if exists
+        if ($candidate->photo) {
+            Storage::delete($candidate->photo);
         }
 
-        $candidate->update([
-            'name' => $request->name,
-            'platform' => $request->platform,
-        ]);
-
-        return response()->json($candidate);
+        // Store new photo
+        $path = $request->file('photo')->store('candidate_photos');
+        $candidate->photo = $path;
     }
+
+    $candidate->save();
+
+    return response()->json($candidate, 200);
+}
+
 
     // Delete a candidate
     public function destroy($id)
