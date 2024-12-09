@@ -3,6 +3,8 @@ import { Head, Link } from '@inertiajs/react';
 import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa';
 import { FaPen, FaTrashAlt } from 'react-icons/fa';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+
 
 export default function ManageCandidates({ positions, electionId, flash }) {
     const [positionsData, setPositionsData] = useState([]);
@@ -89,18 +91,37 @@ export default function ManageCandidates({ positions, electionId, flash }) {
     };
 
     const handleDeleteCandidate = async (candidateId) => {
-        try {
-            await axios.delete(`/candidates/${candidateId}`);
-
-            // Update candidates both in state and localStorage
-            const updatedCandidates = candidates.filter(candidate => candidate.id !== candidateId);
-            setCandidates(updatedCandidates);
-            localStorage.setItem(`candidates_${selectedPosition}`, JSON.stringify(updatedCandidates));
-        } catch (error) {
-            console.error('Error deleting candidate:', error);
-            setError('An error occurred while deleting the candidate.');
-        }
+        // Show a confirmation dialog before deleting
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this action!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    // Proceed with the deletion if confirmed
+                    await axios.delete(`/candidates/${candidateId}`);
+    
+                    // Update candidates both in state and localStorage
+                    const updatedCandidates = candidates.filter(candidate => candidate.id !== candidateId);
+                    setCandidates(updatedCandidates);
+                    localStorage.setItem(`candidates_${selectedPosition}`, JSON.stringify(updatedCandidates));
+    
+                    // Show success message
+                    Swal.fire('Deleted!', 'The candidate has been deleted.', 'success');
+                } catch (error) {
+                    console.error('Error deleting candidate:', error);
+                    setError('An error occurred while deleting the candidate.');
+                    Swal.fire('Error!', 'An error occurred while deleting the candidate.', 'error');
+                }
+            }
+        });
     };
+    
 
     const handleEditCandidate = (candidate) => {
         setEditingCandidate(candidate);
