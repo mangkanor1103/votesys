@@ -26,6 +26,11 @@ export default function NotStudent() {
             const response = await axios.post('/student-verification', formData);
             setSuccess(response.data.message);
             setError('');
+
+            // Redirect to the /student page after successful registration
+            if (response.data.redirect) {
+                window.location.href = response.data.redirect;
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'An error occurred');
         }

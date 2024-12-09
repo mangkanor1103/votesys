@@ -25,10 +25,10 @@ class StudentVerificationController extends Controller
             'password' => Hash::make($request->password), // Hash the password
         ]);
 
-        // Return a success message along with a redirect URL
+        // Return a success message along with a redirect URL or route name
         return response()->json([
             'message' => 'Registration successful',
-            'redirect_url' => route('student.dashboard') // Assuming you have a route for StuDashboard
+            'redirect' => '/student', // The route to redirect after successful registration
         ], 201);
     }
 }
