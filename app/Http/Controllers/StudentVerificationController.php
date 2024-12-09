@@ -36,22 +36,47 @@ class StudentVerificationController extends Controller
 
 
     public function login(Request $request)
-{
-    $request->validate([
-        'school_id' => 'required',
-        'password' => 'required',
-    ]);
+    {
+        // Validate input fields
+        $request->validate([
+            'school_id' => 'required',
+            'password' => 'required',
+        ]);
 
-    $student = DB::table('students')->where('school_id', $request->school_id)->first();
+        // Find the student by school_id
+        $student = DB::table('students')->where('school_id', $request->school_id)->first();
 
-    if ($student && Hash::check($request->password, $student->password)) {
-        return response()->json(['success' => true]); // Confirm this response
+        // If the student is not found
+        if (!$student) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The school ID does not exist. Please check your ID and try again.',
+            ], 404); // Not Found HTTP status
+        }
+
+        // If the password is incorrect
+        if (!Hash::check($request->password, $student->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Incorrect password. Please try again.',
+            ], 401); // Unauthorized HTTP status
+        }
+
+        // Successful login
+        return response()->json([
+            'success' => true,
+            'student' => [
+                'id' => $student->id,
+                'school_id' => $student->school_id,
+                'name' => $student->name,
+                'department' => $student->department,
+            ],
+            'message' => 'Login successful.',
+        ], 200); // OK HTTP status
     }
 
-    return response()->json(['success' => false, 'message' => 'Invalid credentials.'], 401);
-}
 
 
-    
+
 
 }

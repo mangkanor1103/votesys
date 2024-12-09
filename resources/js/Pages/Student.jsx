@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios'; // Make sure axios is installed
+import axios from 'axios'; // Ensure axios is installed
 import { Head } from '@inertiajs/react';
-import { Inertia } from '@inertiajs/inertia';
 
 export default function Student() {
     const [formData, setFormData] = useState({
@@ -9,6 +8,7 @@ export default function Student() {
         password: '',
     });
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false); // Loading state
 
     const handleChange = (e) => {
         setFormData({
@@ -19,12 +19,23 @@ export default function Student() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-    
+
+        // Validate empty fields before sending
+        if (!formData.school_id || !formData.password) {
+            setError('All fields are required.');
+            return;
+        }
+
+        setIsLoading(true); // Set loading state
+
         try {
             const response = await axios.post('/student-login', formData);
             console.log('Login Response:', response.data); // Debug response
-    
+
             if (response.data.success) {
+                // Save student data to localStorage
+                localStorage.setItem('studentData', JSON.stringify(response.data.student));
+                // Redirect to the dashboard
                 window.location.href = '/StuDashboard';
             } else {
                 setError(response.data.message || 'Invalid credentials, please try again.');
@@ -32,9 +43,10 @@ export default function Student() {
         } catch (err) {
             console.error('Login Error:', err.response?.data || err.message);
             setError(err.response?.data?.message || 'An error occurred during login.');
+        } finally {
+            setIsLoading(false); // Reset loading state
         }
     };
-    
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-green-200 to-green-500 flex flex-col justify-center items-center">
@@ -83,12 +95,16 @@ export default function Student() {
                     {/* Login Button */}
                     <button
                         type="submit"
-                        className="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300"
+                        disabled={isLoading}
+                        className={`w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg ${
+                            isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'
+                        } transition duration-300`}
                     >
-                        Login
+                        {isLoading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
             </div>
+
             {/* Green Leaf Icon */}
             <div className="absolute bottom-10">
                 <img
