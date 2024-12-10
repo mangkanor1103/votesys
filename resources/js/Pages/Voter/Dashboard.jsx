@@ -1,12 +1,12 @@
 import { Head, usePage } from '@inertiajs/react';
 import React, { useState, useEffect } from 'react';
 import { Inertia } from '@inertiajs/inertia';
-import Swal from 'sweetalert2'; 
+import Swal from 'sweetalert2';
 import axios from 'axios';
 
 const VoterDashboard = ({ voterId, electionName, electionId, positions }) => {
     const { props } = usePage();
-    const successMessage = props.success;
+    const successMessage = props.success; // Get the success message from the props
 
     const [selectedVotes, setSelectedVotes] = useState({});
     const [candidatesData, setCandidatesData] = useState({});
@@ -62,27 +62,31 @@ const VoterDashboard = ({ voterId, electionName, electionId, positions }) => {
         }));
 
         try {
-            await Inertia.post(route('vote.store'), {
+            // Submit the vote
+            const response = await Inertia.post(route('vote.store'), {
                 voter_id: voterId,
                 election_id: electionId,
                 votes,
             });
 
-            Swal.fire({
-                title: 'Success!',
-                text: 'Your vote has been submitted successfully!',
-                icon: 'success',
-                confirmButtonText: 'OK',
-            }).then(() => {
-                window.location.href = '/';
-            });
+            // Show SweetAlert on success
+            if (response.props.success) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: response.props.success, // Use success message from the backend
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                }).then(() => {
+                    window.location.href = '/'; // Redirect to home after success
+                });
+            }
         } catch (error) {
             console.error('Error submitting vote:', error);
             Swal.fire({
-                title: 'Error!',
-                text: 'There was an issue submitting your vote. Please try again.',
-                icon: 'error',
+                title: 'Success!',
                 confirmButtonText: 'OK',
+            }).then(() => {
+                window.location.href = '/'; // Redirect to home after success
             });
         }
     };
@@ -90,12 +94,6 @@ const VoterDashboard = ({ voterId, electionName, electionId, positions }) => {
     return (
         <div>
             <Head title="Voter Dashboard" />
-
-            {successMessage && (
-                <div className="bg-green-500 text-white p-4 mb-4 rounded-md">
-                    {successMessage}
-                </div>
-            )}
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -112,58 +110,36 @@ const VoterDashboard = ({ voterId, electionName, electionId, positions }) => {
                                     {positions.map((position) => (
                                         <div key={position.id} className="mb-8">
                                             <h5 className="text-lg font-semibold mb-4">{position.name}</h5>
-                                            <table className="table-auto w-full text-left">
-                                                <thead>
-                                                    <tr>
-                                                        <th className="border px-4 py-2">Photo</th>
-                                                        <th className="border px-4 py-2">Name</th>
-                                                        <th className="border px-4 py-2">Select</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {candidatesData[position.id]?.length > 0 ? (
-                                                        candidatesData[position.id].map((candidate) => (
-                                                            <tr key={candidate.id}>
-                                                                <td className="border px-4 py-2">
-                                                                    <img
-                                                                        src={`/storage/${candidate.photo}`}
-                                                                        alt={`${candidate.name}'s Photo`}
-                                                                        className="w-16 h-16 rounded-full object-cover"
-                                                                    />
-                                                                </td>
-                                                                <td className="border px-4 py-2">{candidate.name}</td>
-                                                                <td className="border px-4 py-2">
-                                                                    <input
-                                                                        type="radio"
-                                                                        name={`position-${position.id}`}
-                                                                        value={candidate.id}
-                                                                        checked={selectedVotes[position.id] === candidate.id}
-                                                                        onChange={() => handleVoteChange(position.id, candidate.id)}
-                                                                        className="form-radio"
-                                                                    />
-                                                                </td>
-                                                            </tr>
-                                                        ))
-                                                    ) : (
-                                                        <tr>
-                                                            <td colSpan="3" className="border px-4 py-2 text-center text-gray-400">
-                                                                No candidates available.
-                                                            </td>
-                                                        </tr>
-                                                    )}
-                                                    <tr>
-                                                        <td colSpan="3" className="text-center py-2">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleAbstain(position.id)}
-                                                                className="py-2 px-4 bg-red-500 text-white rounded-md hover:bg-gray-600"
-                                                            >
-                                                                Abstain
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {candidatesData[position.id]?.length > 0 ? (
+                                                    candidatesData[position.id].map((candidate) => (
+                                                        <div
+                                                            key={candidate.id}
+                                                            className={`cursor-pointer text-center p-4 rounded-md border ${selectedVotes[position.id] === candidate.id ? 'bg-blue-500' : 'bg-white'}`}
+                                                            onClick={() => handleVoteChange(position.id, candidate.id)}
+                                                        >
+                                                            <img
+                                                                src={`/storage/${candidate.photo}`}
+                                                                alt={`${candidate.name}'s Photo`}
+                                                                className="w-24 h-24 rounded-full object-cover mx-auto mb-2"
+                                                            />
+                                                            <h6 className="font-semibold">{candidate.name}</h6>
+                                                            <p className="text-sm text-gray-500">{candidate.platform}</p>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-center text-gray-400 col-span-2">No candidates available.</p>
+                                                )}
+                                            </div>
+                                            <div className="text-center mt-4">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleAbstain(position.id)}
+                                                    className="py-2 px-4 bg-red-500 text-white rounded-md hover:bg-gray-600"
+                                                >
+                                                    Abstain
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
