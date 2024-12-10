@@ -121,6 +121,16 @@ export default function NotStudent() {
                     >
                         Register
                     </button>
+
+                    {/* Navigation Buttons */}
+                    <div className="mt-6 flex justify-center w-full">
+                        <a
+                            href="/"
+                            className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300 text-center"
+                            >
+                            Home
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>

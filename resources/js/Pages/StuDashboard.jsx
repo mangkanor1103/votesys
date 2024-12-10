@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Link, Head } from '@inertiajs/react';
 import axios from 'axios';
-import { FaUser, FaVoteYea, FaSearch } from 'react-icons/fa';
+import { FaUser, FaVoteYea, FaSearch, FaChalkboardTeacher } from 'react-icons/fa';
 
 export default function StuDashboard() {
     const [student, setStudent] = useState(null);
@@ -32,8 +32,20 @@ export default function StuDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-green-200 to-green-500 flex flex-col justify-center items-center px-4">
+        <div className="min-h-screen bg-gradient-to-b from-green-200 to-green-500 flex flex-col items-center px-4">
             <Head title="Student Dashboard" />
+
+            {/* Logout Button */}
+            <div className="w-full max-w-6xl flex justify-end p-4">
+                <Link
+                    href={route('welcome')}
+                    className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
+                >
+                    <FaChalkboardTeacher className="text-xl" /> Logout
+                </Link>
+            </div>
+
+            {/* Dashboard Heading */}
             <h1 className="text-4xl font-extrabold text-green-900 mb-4 animate-fade-in">Student Dashboard</h1>
             <p className="text-lg text-green-800 mb-8 text-center animate-slide-up">
                 Welcome! You're registered as a student at Mindoro State University.

@@ -105,6 +105,16 @@ export default function Student() {
                 </form>
             </div>
 
+            {/* Navigation Buttons */}
+            <div className="mt-6 flex gap-4">
+                <a
+                    href="/"
+                    className="bg-green-700 text-white py-2 px-4 rounded-lg shadow-lg hover:bg-green-800 transition-transform transform hover:scale-105"
+                >
+                    Home
+                </a>
+            </div>
+
             {/* Green Leaf Icon */}
             <div className="absolute bottom-10">
                 <img
