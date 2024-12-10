@@ -10,6 +10,28 @@ use Inertia\Inertia;
 
 class VoterController extends Controller
 {
+    /**
+ * Show the list of voters.
+ *
+ * @param \Illuminate\Http\Request $request
+ * @return \Inertia\Response|\Illuminate\Http\JsonResponse
+ */
+public function index(Request $request)
+{
+    // Fetch all voters from the database
+    $voters = Voter::with('election:id,election_name')->get();
+
+    // Check if the request expects a JSON response (e.g., from an API call)
+    if ($request->wantsJson()) {
+        return response()->json($voters); // Return JSON response for API calls
+    }
+
+    // Return the view with the voters data using Inertia for normal requests
+    return Inertia::render('Admin/Voters', [
+        'voters' => $voters,
+    ]);
+}
+
 
 
     /**
