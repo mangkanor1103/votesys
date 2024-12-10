@@ -98,4 +98,12 @@ class CandidateController extends Controller
         // Return the stored path or a response
         return response()->json(['path' => $path], 200);
     }
+    
+    public function getCandidates($positionId)
+{
+    $candidates = Candidate::where('position_id', $positionId)
+        ->get(['id', 'name', 'photo']); // Fetch only relevant fields
+    return response()->json($candidates);
+}
+
 }

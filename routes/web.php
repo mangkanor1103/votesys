@@ -16,6 +16,9 @@ use App\Http\Controllers\ElectionResultController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudentVerificationController;
 
+Route::get('/api/candidates/{positionId}', [CandidateController::class, 'getCandidates']);
+
+
 Route::post('/candidates/{id}', [CandidateController::class, 'update']);
 
 Route::get('/elections', [ElectionController::class, 'index'])->name('elections.index');
