@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
+import { FaUser, FaVoteYea, FaSearch } from 'react-icons/fa';
 
 export default function StuDashboard() {
     const [student, setStudent] = useState(null);
@@ -10,68 +11,41 @@ export default function StuDashboard() {
     const [selectedElection, setSelectedElection] = useState('');
 
     useEffect(() => {
-        // Fetch student data from localStorage
         const storedStudent = localStorage.getItem('studentData');
         if (storedStudent) {
-            const parsedStudent = JSON.parse(storedStudent);
-            setStudent(parsedStudent);
+            setStudent(JSON.parse(storedStudent));
         }
 
-        // Fetch elections data from the backend API
-        axios.get('/elections') // Adjust the URL if needed
-            .then(response => {
-                if (response.data && response.data.length > 0) {
-                    setElections(response.data);
-                } else {
-                    console.log('No elections available');
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching elections:', error);
-                alert('Error fetching elections. Please try again later.');
-            });
+        axios.get('/elections')
+            .then(response => setElections(response.data))
+            .catch(error => console.error('Error fetching elections:', error));
 
-        // Fetch voters data from the backend API
-        axios.get('/voters') // Adjust the URL if needed
-            .then(response => {
-                if (response.data && response.data.length > 0) {
-                    setVoters(response.data);
-                } else {
-                    console.log('No voters available');
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching voters:', error);
-                alert('Error fetching voters. Please try again later.');
-            });
+        axios.get('/voters')
+            .then(response => setVoters(response.data))
+            .catch(error => console.error('Error fetching voters:', error));
     }, []);
 
-    // Handle election selection
     const handleElectionChange = (event) => {
         const selectedElectionId = event.target.value;
         setSelectedElection(selectedElectionId);
-
-        // Filter voters for the selected election
-        if (selectedElectionId) {
-            const filtered = voters.filter(
-                (voter) => voter.election_id === parseInt(selectedElectionId)
-            );
-            setFilteredVoters(filtered);
-        } else {
-            setFilteredVoters([]);
-        }
+        setFilteredVoters(voters.filter(voter => voter.election_id === parseInt(selectedElectionId)));
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-green-200 to-green-500 flex flex-col justify-center items-center">
+        <div className="min-h-screen bg-gradient-to-b from-green-200 to-green-500 flex flex-col justify-center items-center px-4">
             <Head title="Student Dashboard" />
-            <h1 className="text-4xl font-extrabold text-green-900 mb-6">Welcome to the Student Dashboard</h1>
-            <p className="text-lg text-green-800 mb-12 text-center">
-                You're successfully registered as a student at Mindoro State University.
+            <h1 className="text-4xl font-extrabold text-green-900 mb-4 animate-fade-in">Student Dashboard</h1>
+            <p className="text-lg text-green-800 mb-8 text-center animate-slide-up">
+                Welcome! You're registered as a student at Mindoro State University.
             </p>
-            <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg mb-8">
+
+            {/* Student Information */}
+            <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-lg mb-8 transition-transform transform hover:scale-105">
+                <h2 className="text-2xl font-semibold text-green-900 flex items-center gap-2">
+                    <FaUser className="text-green-500" /> Your Information
+                </h2>
                 {student ? (
-                    <div>
+                    <div className="mt-4 space-y-2">
                         <p><strong>ID:</strong> {student.id}</p>
                         <p><strong>School ID:</strong> {student.school_id}</p>
                         <p><strong>Name:</strong> {student.name}</p>
@@ -82,12 +56,15 @@ export default function StuDashboard() {
                 )}
             </div>
 
-            <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-lg mb-8">
-                <h2 className="text-2xl font-semibold text-green-900 mb-4">Select Election</h2>
+            {/* Election Dropdown */}
+            <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-lg mb-8 transition-transform transform hover:scale-105">
+                <h2 className="text-2xl font-semibold text-green-900 flex items-center gap-2">
+                    <FaVoteYea className="text-green-500" /> Select Election
+                </h2>
                 <select
                     value={selectedElection}
                     onChange={handleElectionChange}
-                    className="w-full border border-green-300 rounded-md px-4 py-2 text-green-900"
+                    className="mt-4 w-full border border-green-300 rounded-md px-4 py-2 text-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
                 >
                     <option value="">-- Select an Election --</option>
                     {elections.map((election) => (
@@ -98,14 +75,17 @@ export default function StuDashboard() {
                 </select>
                 {selectedElection && (
                     <p className="mt-4 text-green-800">
-                        Showing voters for election: {elections.find(e => e.id === parseInt(selectedElection))?.election_name || ''}
+                        Viewing voters for: <strong>{elections.find(e => e.id === parseInt(selectedElection))?.election_name}</strong>
                     </p>
                 )}
             </div>
 
-            <div className="w-full max-w-4xl bg-white p-8 rounded-lg shadow-lg">
-                <h2 className="text-2xl font-semibold text-green-900 mb-4">Voters</h2>
-                <table className="min-w-full divide-y divide-green-200">
+            {/* Voters Table */}
+            <div className="w-full max-w-4xl bg-white p-6 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+                <h2 className="text-2xl font-semibold text-green-900 flex items-center gap-2 mb-4">
+                    <FaSearch className="text-green-500" /> Voters List
+                </h2>
+                <table className="min-w-full divide-y divide-green-200 animate-slide-up">
                     <thead className="bg-green-600">
                         <tr>
                             <th className="px-6 py-3 text-left text-sm font-bold text-white uppercase tracking-wide">Voter Code</th>
@@ -114,13 +94,15 @@ export default function StuDashboard() {
                     <tbody className="bg-white divide-y divide-green-100">
                         {filteredVoters.length > 0 ? (
                             filteredVoters.map((voter) => (
-                                <tr key={voter.id} className="hover:bg-green-50">
+                                <tr key={voter.id} className="hover:bg-green-50 transition">
                                     <td className="px-6 py-4 text-sm text-green-900">{voter.voter_code}</td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="1" className="px-6 py-4 text-sm text-center text-green-900">No voters found for the selected election.</td>
+                                <td colSpan="1" className="px-6 py-4 text-sm text-center text-green-900">
+                                    No voters found for the selected election.
+                                </td>
                             </tr>
                         )}
                     </tbody>
