@@ -66,10 +66,10 @@ export default function NotStudent() {
                     {/* Upload Button */}
                     <button
                         type="submit"
-                        className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300"
+                        className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300 mb-4"
                     >
                         Upload Photo
-                    </button>\
+                    </button>
 
                     {/* Navigation Buttons */}
                     <div className="flex justify-center w-full">

@@ -190,14 +190,12 @@ export default function ManageCandidates({ positions, electionId, flash }) {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
+        <div className="min-h-screen bg-cover bg-center"
+        style={{ backgroundImage: "url('/images/bg.jpg')" }}>
             <Head title="Manage Positions" />
             <nav className="bg-transparent text-white shadow-lg border-b-4 border-green-300">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <div className="flex flex-col sm:flex-row justify-between items-center">
-                        <h2 className="text-3xl font-extrabold text-green-100 tracking-wide">
-                            Mindoro State University Voting System
-                        </h2>
                         <div className="flex flex-col sm:flex-row items-center gap-6 mt-4 sm:mt-0">
                             <Link href={route('subdashboard')} className="text-white flex items-center gap-2 px-6 py-3 rounded-lg">
                                 <FaHome className="text-xl" /> Home
@@ -232,6 +230,10 @@ export default function ManageCandidates({ positions, electionId, flash }) {
                         </div>
                     </div>
                 </div>
+                 {/* Added Mindoro State University Online Voting System text at the bottom */}
+    <div className="bg-green-500 text-center text-white py-2 mt-4">
+        <p className="text-sm">Mindoro State University Online Voting System</p>
+    </div>
             </nav>
             <div className="py-12">
                 <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">

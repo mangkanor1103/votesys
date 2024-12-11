@@ -1,4 +1,3 @@
-// Import additional components as needed
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
@@ -12,21 +11,21 @@ export default function AuthenticatedLayout({ header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     return (
-        <div className="min-h-screen bg-green-900 text-green-50">
-            <nav className="border-b bg-gradient-to-r from-green-700 via-teal-700 to-green-500 shadow-lg">
+        <div className="min-h-screen bg-cover bg-center" style={{ backgroundImage: 'url(/images/bg.jpg)' }}>
+            <nav className="border-b bg-gradient-to-r from-green-600 to-green-500 shadow-lg">
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between items-center">
                         <div className="flex items-center">
                             <Link href="/" className="flex items-center">
-                                <ApplicationLogo className="h-9 w-auto text-green-50" />
-                                <span className="ml-2 font-semibold text-lg text-green-50">RKA Team</span>
+                                <ApplicationLogo className="h-9 w-auto text-teal-50" />
+                                <span className="ml-2 font-semibold text-lg text-teal-50">RKA Team</span>
                             </Link>
 
                             <div className="hidden space-x-8 sm:flex sm:ml-10">
                                 <NavLink
                                     href={route('dashboard')}
                                     active={route().current('dashboard')}
-                                    className="text-green-200 hover:text-green-300"
+                                    className="text-teal-200 hover:text-teal-300"
                                 >
                                     Dashboard
                                 </NavLink>
@@ -34,7 +33,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <NavLink
                                     href={route('superadmin.elections')}
                                     active={route().current('superadmin.elections')}
-                                    className="text-green-200 hover:text-green-300"
+                                    className="text-teal-200 hover:text-teal-300"
                                 >
                                     Elections
                                 </NavLink>
@@ -44,7 +43,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         <div className="hidden sm:flex sm:items-center">
                             <Dropdown>
                                 <Dropdown.Trigger>
-                                    <button className="flex items-center px-3 py-2 bg-green-700 rounded-full text-green-50 hover:bg-green-800 focus:outline-none">
+                                    <button className="flex items-center px-3 py-2 bg-teal-700 rounded-full text-teal-50 hover:bg-teal-800 focus:outline-none">
                                         <FaLeaf className="mr-2" />
                                         <span className="text-sm font-medium mr-2">{user.name}</span>
                                         <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
@@ -68,7 +67,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         <div className="flex sm:hidden items-center">
                             <button
                                 onClick={() => setShowingNavigationDropdown(prev => !prev)}
-                                className="inline-flex items-center p-2 text-green-100 hover:text-green-300 focus:outline-none"
+                                className="inline-flex items-center p-2 text-teal-100 hover:text-teal-300 focus:outline-none"
                             >
                                 <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                                     <path
@@ -92,11 +91,11 @@ export default function AuthenticatedLayout({ header, children }) {
                 </div>
 
                 <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
-                    <div className="space-y-1 py-2 bg-green-800">
+                    <div className="space-y-1 py-2 bg-teal-800">
                         <ResponsiveNavLink
                             href={route('dashboard')}
                             active={route().current('dashboard')}
-                            className="text-green-200 hover:text-green-300"
+                            className="text-teal-200 hover:text-teal-300"
                         >
                             Dashboard
                         </ResponsiveNavLink>
@@ -104,23 +103,23 @@ export default function AuthenticatedLayout({ header, children }) {
                         <ResponsiveNavLink
                             href={route('superadmin.elections')}
                             active={route().current('superadmin.elections')}
-                            className="text-green-200 hover:text-green-300"
+                            className="text-teal-200 hover:text-teal-300"
                         >
                             Elections
                         </ResponsiveNavLink>
                     </div>
 
-                    <div className="border-t border-green-300 py-4 bg-green-800">
+                    <div className="border-t border-teal-300 py-4 bg-teal-800">
                         <div className="px-4">
-                            <div className="text-base font-medium text-green-50">{user.name}</div>
-                            <div className="text-sm font-medium text-green-300">{user.email}</div>
+                            <div className="text-base font-medium text-teal-50">{user.name}</div>
+                            <div className="text-sm font-medium text-teal-300">{user.email}</div>
                         </div>
 
                         <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')} className="text-green-200 hover:text-green-300">
+                            <ResponsiveNavLink href={route('profile.edit')} className="text-teal-200 hover:text-teal-300">
                                 Profile
                             </ResponsiveNavLink>
-                            <ResponsiveNavLink method="post" href={route('logout')} as="button" className="text-green-200 hover:text-green-300">
+                            <ResponsiveNavLink method="post" href={route('logout')} as="button" className="text-teal-200 hover:text-teal-300">
                                 Log Out
                             </ResponsiveNavLink>
                         </div>
@@ -129,14 +128,14 @@ export default function AuthenticatedLayout({ header, children }) {
             </nav>
 
             {header && (
-                <header className="bg-gradient-to-r from-green-700 via-teal-700 to-green-500 shadow-md">
+                <header className="bg-gradient-to-r from-green-600 to-green-500 shadow-md">
                     <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-                        <h1 className="text-xl font-semibold text-green-50">{header}</h1>
+                        <h1 className="text-xl font-semibold text-teal-50">{header}</h1>
                     </div>
                 </header>
             )}
 
-            <main className="bg-green-900">
+            <main className="bg-teal-900 bg-opacity-60">
                 <div className="mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-8">
                     {children}
                 </div>

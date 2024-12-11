@@ -3,9 +3,10 @@ import { FaVoteYea, FaEdit, FaTrash } from 'react-icons/fa';
 import InputError from "@/Components/InputError";
 import PrimaryButton from "@/Components/PrimaryButton";
 import { Head, useForm } from "@inertiajs/react";
-import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Inertia } from '@inertiajs/inertia';
 import Swal from 'sweetalert2'; // Import SweetAlert2
+import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
+
 
 export default function Elections({ auth, elections }) {
     const { data, setData, post, processing, reset, errors } = useForm({
