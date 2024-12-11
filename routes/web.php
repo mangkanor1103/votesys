@@ -17,6 +17,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudentVerificationController;
 use App\Http\Controllers\PhotoController;
 
+Route::get('/re-student', function () {
+    return Inertia::render('NotStudent');
+})->name('restudent');
+
 Route::post('/upload-photo', [PhotoController::class, 'store'])->name('photo.store');
 
 

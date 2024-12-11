@@ -9,23 +9,21 @@ use Illuminate\Support\Facades\Storage;
 class PhotoController extends Controller
 {
     public function store(Request $request)
-    {
-        $request->validate([
-            'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Validate the uploaded file
-        ]);
+{
+    $request->validate([
+        'photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
 
-        // Store the file in the 'public/photos' directory
-        $filePath = $request->file('photo')->store('photos', 'public');
+    $filePath = $request->file('photo')->store('photos', 'public');
 
-        // Save the file path in the database
-        $photo = Photo::create([
-            'photo_path' => $filePath,
-        ]);
+    $photo = Photo::create(['photo_path' => $filePath]);
 
-        return response()->json([
-            'message' => 'Photo uploaded successfully.',
-            'photo' => $photo,
-        ]);
-    }
+    return response()->json([
+        'message' => 'Photo uploaded successfully.',
+        'redirect' => '/re-student', // Add redirect URL here
+        'photo' => $photo,
+    ]);
+}
+
 }
 
