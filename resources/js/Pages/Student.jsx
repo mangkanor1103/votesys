@@ -96,23 +96,21 @@ export default function Student() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className={`w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg ${
+                        className={`w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg mb-4 ${
                             isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'
                         } transition duration-300`}
                     >
                         {isLoading ? 'Logging in...' : 'Login'}
                     </button>
+                    <div className="flex justify-center w-full">
+                        <a
+                            href="/"
+                            className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300 text-center"
+                            >
+                            Home
+                        </a>
+                    </div>
                 </form>
-            </div>
-
-            {/* Navigation Buttons */}
-            <div className="mt-6 flex gap-4">
-                <a
-                    href="/"
-                    className="bg-green-700 text-white py-2 px-4 rounded-lg shadow-lg hover:bg-green-800 transition-transform transform hover:scale-105"
-                >
-                    Home
-                </a>
             </div>
 
             {/* Green Leaf Icon */}

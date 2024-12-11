@@ -1,6 +1,6 @@
-import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt } from 'react-icons/fa'; // Icons
+import { FaHome, FaUser, FaUsers, FaUserTie, FaSignOutAlt, FaRegFlag, FaSignInAlt  } from 'react-icons/fa'; // Updated icons
 import { Head, Link, useForm } from '@inertiajs/react'; // Import useForm hook
-import { CSSTransition } from 'react-transition-group';
+import { motion } from 'framer-motion'; // Import motion
 import { useState } from 'react';
 
 export default function Welcome({ auth, laravelVersion, phpVersion }) {
@@ -40,14 +40,22 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
+        <div className="min-h-screen bg-cover bg-center" style={{ backgroundImage: 'url(/images/bg.jpg)' }}>
             <Head title="Welcome" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <h1 className="text-3xl font-extrabold text-green-100 tracking-wide text-center mb-12">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ">
+                {/* Logo Section */}
+                <div className="flex justify-center mb-1">
+                    <img
+                        src="/images/logo.jpg"
+                        alt="Logo"
+                        className="w-24 h-24 rounded-full"
+                    /> {/* Adjusted to make the logo small and circular */}
+                </div>
+
+                <h1 className="text-3xl font-extrabold text-green-100 tracking-wide text-center mb-6">
                     Mindoro State University Online Voting System
                 </h1>
-                
 
                 {/* Input for Voter ID */}
                 <div className="mb-12 flex justify-center">
@@ -71,60 +79,85 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                 <div className="flex justify-center">
                     <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
                         <div className="flex flex-col gap-4">
-                            {/* Submit Button */}
-                            <button
-                                className={`text-white flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'submit' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+
+                            {/* First Row: Submit Button */}
+                            <motion.button
+                                className={`text-white flex items-center justify-center gap-2 px-6 py-3 w-full rounded-lg transition transform ${hoveredButton === 'submit' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
                                 onMouseEnter={() => handleHover('submit')}
                                 onMouseLeave={handleLeave}
                                 onClick={handleSubmit}
                                 disabled={processing}
+                                whileHover={{ y: -5 }} // Move up when hovered
+                                transition={{ duration: 0.2 }} // Smooth transition
                             >
                                 <FaRegFlag className="text-xl" /> Submit
-                            </button>
+                            </motion.button>
 
-                            {/* Sub Admin Button */}
-                            <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
-                                <Link
-                                    href={route('subAdmin.login')}
-                                    className={`text-white flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'subAdmin' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
-                                    onMouseEnter={() => handleHover('subAdmin')}
-                                    onMouseLeave={handleLeave}
+                            {/* Second Row: Super Admin and Sub Admin Buttons */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.5 }}
                                 >
-                                    <FaUsers className="text-xl" /> Sub Admin
-                                </Link>
-                            </CSSTransition>
+                                    <Link
+                                        href={route('subAdmin.login')}
+                                        className={`text-white flex items-center justify-center gap-2 px-6 py-3 w-full rounded-lg transition transform ${hoveredButton === 'subAdmin' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+                                        onMouseEnter={() => handleHover('subAdmin')}
+                                        onMouseLeave={handleLeave}
+                                    >
+                                        <FaUsers className="text-xl" /> Sub Admin
+                                    </Link>
+                                </motion.div>
 
-                            {/* Super Admin Button */}
-                            <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
-                                <Link
-                                    href={route('login')}
-                                    className={`text-white flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'superAdmin' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
-                                    onMouseEnter={() => handleHover('superAdmin')}
-                                    onMouseLeave={handleLeave}
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.5 }}
                                 >
-                                    <FaChalkboardTeacher className="text-xl" /> Super Admin
-                                </Link>
-                            </CSSTransition>
+                                    <Link
+                                        href={route('login')}
+                                        className={`text-white flex items-center justify-center gap-2 px-6 py-3 w-full rounded-lg transition transform ${hoveredButton === 'superAdmin' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+                                        onMouseEnter={() => handleHover('superAdmin')}
+                                        onMouseLeave={handleLeave}
+                                    >
+                                        <FaUserTie className="text-xl" /> Super Admin
+                                    </Link>
+                                </motion.div>
+                            </div>
 
-                            {/* Student Button */}
-                            <Link
-                                href={route('student')}
-                                className={`text-white flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'student' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
-                                onMouseEnter={() => handleHover('student')}
-                                onMouseLeave={handleLeave}
-                            >
-                                <FaHome className="text-xl" /> Log In
-                            </Link>
+                            {/* Third Row: Register and Log In Buttons */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <Link
+                                        href={route('student')}
+                                        className={`text-white flex items-center justify-center gap-2 px-6 py-3 w-full rounded-lg transition transform ${hoveredButton === 'student' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+                                        onMouseEnter={() => handleHover('student')}
+                                        onMouseLeave={handleLeave}
+                                    >
+                                        <FaSignInAlt  className="text-xl" /> Log In
+                                    </Link>
+                                </motion.div>
 
-                            {/* Not Student Button */}
-                            <Link
-                                href={route('not_student')}
-                                className={`text-white flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'notStudent' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
-                                onMouseEnter={() => handleHover('notStudent')}
-                                onMouseLeave={handleLeave}
-                            >
-                                <FaSignOutAlt className="text-xl" /> Register
-                            </Link>
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <Link
+                                        href={route('not_student')}
+                                        className={`text-white flex items-center justify-center gap-2 px-6 py-3 w-full rounded-lg transition transform ${hoveredButton === 'notStudent' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+                                        onMouseEnter={() => handleHover('notStudent')}
+                                        onMouseLeave={handleLeave}
+                                    >
+                                        <FaSignOutAlt className="text-xl" /> Register
+                                    </Link>
+                                </motion.div>
+                            </div>
                         </div>
                     </div>
                 </div>
