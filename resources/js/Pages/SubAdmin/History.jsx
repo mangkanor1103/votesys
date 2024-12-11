@@ -1,10 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
 import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt, FaBars } from 'react-icons/fa';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 export default function Welcome() {
     const { post } = useForm();
@@ -12,7 +8,6 @@ export default function Welcome() {
     const [electionName, setElectionName] = useState('');
     const [votes, setVotes] = useState([]);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [chartData, setChartData] = useState({}); // For chart data
 
     useEffect(() => {
         const storedElectionId = localStorage.getItem('election_id');
@@ -32,7 +27,6 @@ export default function Welcome() {
 
             if (data && data.votes) {
                 setVotes(data.votes);
-                formatChartData(data.votes); // Process chart data
             } else {
                 console.error("Votes data not available or malformed.");
             }
@@ -70,54 +64,6 @@ export default function Welcome() {
         }
         return acc;
     }, {});
-
-    // Format the chart data
-    const formatChartData = (votes) => {
-        const data = {
-            labels: [], // Candidate names
-            datasets: [] // Votes count
-        };
-
-        // Assuming you want to show one chart per position
-        const positionVotes = {};
-
-        votes.forEach((vote) => {
-            const position = positionMap[vote.position_id];
-            const candidateName = vote.candidate.name;
-
-            if (!positionVotes[position]) {
-                positionVotes[position] = {
-                    labels: [],
-                    votes: []
-                };
-            }
-
-            if (!positionVotes[position].labels.includes(candidateName)) {
-                positionVotes[position].labels.push(candidateName);
-                positionVotes[position].votes.push(1); // Initialize vote count
-            } else {
-                const index = positionVotes[position].labels.indexOf(candidateName);
-                positionVotes[position].votes[index] += 1; // Increment vote count
-            }
-        });
-
-        // Create a separate chart for each position
-        const chartDataArr = Object.keys(positionVotes).map((position) => ({
-            positionName: position,
-            data: {
-                labels: positionVotes[position].labels,
-                datasets: [{
-                    label: position,
-                    data: positionVotes[position].votes,
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
-                }],
-            },
-        }));
-
-        setChartData(chartDataArr); // Set chart data for each position
-    };
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
@@ -199,26 +145,6 @@ export default function Welcome() {
                                 <div className="text-green-700 text-lg font-semibold">
                                     <p className="text-xl font-semibold">Election Name:</p>
                                     <p className="text-gray-800 text-2xl">{electionName}</p>
-                                </div>
-
-                                {/* Chart Section */}
-                                <div className="mt-6">
-                                    {chartData.length > 0 && chartData.map((positionData, index) => (
-                                        <div key={index} className="mt-6">
-                                            <h4 className="text-lg font-semibold text-green-700">
-                                                {positionData.positionName}
-                                            </h4>
-                                            <Bar data={positionData.data} options={{
-                                                responsive: true,
-                                                plugins: {
-                                                    title: {
-                                                        display: true,
-                                                        text: `${positionData.positionName} Election Results`,
-                                                    },
-                                                },
-                                            }} />
-                                        </div>
-                                    ))}
                                 </div>
 
                                 {/* Display results table */}

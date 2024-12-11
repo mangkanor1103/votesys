@@ -163,6 +163,9 @@ Route::get('/manage-candidates', function () {
 Route::get('/result', function () {
     return Inertia::render('SubAdmin/Result');
 })->name('result');
+Route::get('/history', function () {
+    return Inertia::render('SubAdmin/History');
+})->name('history');
 Route::get('/logout', function () {
     return Inertia::render('Welcome');
 })->name('welcome');

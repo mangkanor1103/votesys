@@ -159,6 +159,12 @@ export default function ManagePositions({ positions, electionId, flash }) {
                                 <FaChalkboardTeacher className="text-xl" /> Result
                             </Link>
                             <Link
+                                href={route('history')}
+                                className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
+                            >
+                                <FaChalkboardTeacher className="text-xl" /> History
+                            </Link>
+                            <Link
                                 href={route('welcome')}
                                 className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
                             >

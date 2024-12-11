@@ -134,23 +134,23 @@ export default function ManageCandidates({ positions, electionId, flash }) {
             if (editPhoto) {
                 formData.append('photo', editPhoto);
             }
-    
+
             const response = await axios.post(`/candidates/${editingCandidate.id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-    
+
             // Update the candidate list
             const updatedCandidates = candidates.map((candidate) =>
                 candidate.id === editingCandidate.id ? response.data : candidate
             );
             setCandidates(updatedCandidates);
             localStorage.setItem(`candidates_${selectedPosition}`, JSON.stringify(updatedCandidates));
-    
+
             // Reset edit state
             setEditingCandidate(null);
-    
+
             // Show success alert
             Swal.fire({
                 icon: 'success',
@@ -160,7 +160,7 @@ export default function ManageCandidates({ positions, electionId, flash }) {
             });
         } catch (error) {
             console.error('Error updating candidate:', error);
-    
+
             // Show error alert
             Swal.fire({
                 icon: 'error',
@@ -170,10 +170,10 @@ export default function ManageCandidates({ positions, electionId, flash }) {
             });
         }
     };
-    
-    
-    
-    
+
+
+
+
 
     const getPositionName = (positionId) => {
         const position = positionsData.find((pos) => pos.id === Number(positionId));
@@ -216,6 +216,12 @@ export default function ManageCandidates({ positions, electionId, flash }) {
                                 className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
                             >
                                 <FaChalkboardTeacher className="text-xl" /> Result
+                            </Link>
+                            <Link
+                                href={route('history')}
+                                className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
+                            >
+                                <FaChalkboardTeacher className="text-xl" /> History
                             </Link>
                             <Link
                                 href={route('welcome')}
