@@ -92,68 +92,70 @@ const VoterDashboard = ({ voterId, electionName, electionId, positions }) => {
     };
 
     return (
-        <div>
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundImage: 'url(/images/bg.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
             <Head title="Voter Dashboard" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="bg-gradient-to-r from-green-700 via-teal-700 to-green-500 shadow-lg sm:rounded-lg border-t-4 border-green-700">
-                        <div className="p-6 text-white">
-                            <h3 className="text-2xl font-semibold mb-4">Welcome, Voter {voterId}</h3>
-                            <p className="text-lg mb-2">
-                                <strong>Election Name:</strong> {electionName}
-                            </p>
-
-                            <form onSubmit={handleSubmit}>
-                                <div className="mt-6">
-                                    <h4 className="text-xl font-semibold mb-3">Vote for Candidates:</h4>
-                                    {positions.map((position) => (
-                                        <div key={position.id} className="mb-8">
-                                            <h5 className="text-lg font-semibold mb-4">{position.name}</h5>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                {candidatesData[position.id]?.length > 0 ? (
-                                                    candidatesData[position.id].map((candidate) => (
-                                                        <div
-                                                            key={candidate.id}
-                                                            className={`cursor-pointer text-center p-4 rounded-md border ${selectedVotes[position.id] === candidate.id ? 'bg-blue-500' : 'bg-white'}`}
-                                                            onClick={() => handleVoteChange(position.id, candidate.id)}
-                                                        >
-                                                            <img
-                                                                src={`/storage/${candidate.photo}`}
-                                                                alt={`${candidate.name}'s Photo`}
-                                                                className="w-24 h-24 rounded-full object-cover mx-auto mb-2"
-                                                            />
-                                                            <h6 className="font-semibold">{candidate.name}</h6>
-                                                            <p className="text-sm text-gray-500">{candidate.platform}</p>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <p className="text-center text-gray-400 col-span-2">No candidates available.</p>
-                                                )}
-                                            </div>
-                                            <div className="text-center mt-4">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleAbstain(position.id)}
-                                                    className="py-2 px-4 bg-red-500 text-white rounded-md hover:bg-gray-600"
-                                                >
-                                                    Abstain
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    className="mt-6 py-2 px-6 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600"
-                                >
-                                    Submit Votes
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+            <div className="w-full max-w-4xl p-8 bg-white rounded-xl shadow-xl">
+                <div className="text-center mb-6">
+                    <h3 className="text-3xl font-bold text-green-800">Welcome, Voter {voterId}</h3>
+                    <p className="text-lg text-gray-700 mt-2">
+                        <strong>Election Name:</strong> {electionName}
+                    </p>
                 </div>
+
+                <form onSubmit={handleSubmit} className="space-y-8">
+                    <div>
+                        <h4 className="text-2xl font-semibold text-gray-800">Vote for Candidates</h4>
+                        <p className="text-lg text-gray-600">Please choose your preferred candidates for each position.</p>
+                    </div>
+
+                    <div className="space-y-6">
+                        {positions.map((position) => (
+                            <div key={position.id} className="bg-gray-100 p-6 rounded-lg shadow-md">
+                                <h5 className="text-xl font-semibold text-gray-800">{position.name}</h5>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                                    {candidatesData[position.id]?.length > 0 ? (
+                                        candidatesData[position.id].map((candidate) => (
+                                            <div
+                                                key={candidate.id}
+                                                className={`cursor-pointer text-center p-4 rounded-lg border-2 ${selectedVotes[position.id] === candidate.id ? 'border-blue-500 bg-blue-100' : 'border-gray-300 bg-white'}`}
+                                                onClick={() => handleVoteChange(position.id, candidate.id)}
+                                            >
+                                                <img
+                                                    src={`/storage/${candidate.photo}`}
+                                                    alt={`${candidate.name}'s Photo`}
+                                                    className="w-24 h-24 rounded-full object-cover mx-auto mb-2"
+                                                />
+                                                <h6 className="font-semibold text-gray-800">{candidate.name}</h6>
+                                                <p className="text-sm text-gray-500">{candidate.platform}</p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <p className="col-span-2 text-center text-gray-400">No candidates available.</p>
+                                    )}
+                                </div>
+                                <div className="text-center mt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleAbstain(position.id)}
+                                        className="py-2 px-6 bg-red-500 text-white font-semibold rounded-md hover:bg-red-600 transition duration-300"
+                                    >
+                                        Abstain
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="text-center mt-8">
+                        <button
+                            type="submit"
+                            className="py-3 px-8 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300"
+                        >
+                            Submit Votes
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );
