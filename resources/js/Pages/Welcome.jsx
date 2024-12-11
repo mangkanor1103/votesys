@@ -47,6 +47,7 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                 <h1 className="text-3xl font-extrabold text-green-100 tracking-wide text-center mb-12">
                     Mindoro State University Online Voting System
                 </h1>
+                
 
                 {/* Input for Voter ID */}
                 <div className="mb-12 flex justify-center">
@@ -67,71 +68,65 @@ export default function Welcome({ auth, laravelVersion, phpVersion }) {
                 )}
 
                 {/* Buttons Section */}
-                <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                    {/* Submit Button */}
-                    <button
-                        className={`text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'submit' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
-                        onMouseEnter={() => handleHover('submit')}
-                        onMouseLeave={handleLeave}
-                        onClick={handleSubmit}
-                        disabled={processing} // Disable while processing
-                    >
-                        <FaRegFlag className="text-xl" /> Submit
-                    </button>
+                <div className="flex justify-center">
+                    <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
+                        <div className="flex flex-col gap-4">
+                            {/* Submit Button */}
+                            <button
+                                className={`text-white flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'submit' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+                                onMouseEnter={() => handleHover('submit')}
+                                onMouseLeave={handleLeave}
+                                onClick={handleSubmit}
+                                disabled={processing}
+                            >
+                                <FaRegFlag className="text-xl" /> Submit
+                            </button>
 
-                    {/* Sub Admin Button */}
-                    <CSSTransition
-                        in={true}
-                        appear={true}
-                        timeout={300}
-                        classNames="fade"
-                    >
-                        <Link
-                            href={route('subAdmin.login')}
-                            className={`text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'subAdmin' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
-                            onMouseEnter={() => handleHover('subAdmin')}
-                            onMouseLeave={handleLeave}
-                        >
-                            <FaUsers className="text-xl" /> Sub Admin
-                        </Link>
-                    </CSSTransition>
+                            {/* Sub Admin Button */}
+                            <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
+                                <Link
+                                    href={route('subAdmin.login')}
+                                    className={`text-white flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'subAdmin' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+                                    onMouseEnter={() => handleHover('subAdmin')}
+                                    onMouseLeave={handleLeave}
+                                >
+                                    <FaUsers className="text-xl" /> Sub Admin
+                                </Link>
+                            </CSSTransition>
 
-                    {/* Super Admin Button */}
-                    <CSSTransition
-                        in={true}
-                        appear={true}
-                        timeout={300}
-                        classNames="fade"
-                    >
-                        <Link
-                            href={route('login')}
-                            className={`text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'superAdmin' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
-                            onMouseEnter={() => handleHover('superAdmin')}
-                            onMouseLeave={handleLeave}
-                        >
-                            <FaChalkboardTeacher className="text-xl" /> Super Admin
-                        </Link>
-                    </CSSTransition>
+                            {/* Super Admin Button */}
+                            <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
+                                <Link
+                                    href={route('login')}
+                                    className={`text-white flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'superAdmin' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+                                    onMouseEnter={() => handleHover('superAdmin')}
+                                    onMouseLeave={handleLeave}
+                                >
+                                    <FaChalkboardTeacher className="text-xl" /> Super Admin
+                                </Link>
+                            </CSSTransition>
 
-                    {/* Student Button */}
-                    <Link
-                        href={route('student')} // Adjust the route to match your setup
-                        className={`text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'student' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
-                        onMouseEnter={() => handleHover('student')}
-                        onMouseLeave={handleLeave}
-                    >
-                        <FaHome className="text-xl" /> Student
-                    </Link>
+                            {/* Student Button */}
+                            <Link
+                                href={route('student')}
+                                className={`text-white flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'student' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+                                onMouseEnter={() => handleHover('student')}
+                                onMouseLeave={handleLeave}
+                            >
+                                <FaHome className="text-xl" /> Log In
+                            </Link>
 
-                    {/* Not Student Button */}
-                    <Link
-                        href={route('not_student')} // Adjust the route to match your setup
-                        className={`text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'notStudent' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
-                        onMouseEnter={() => handleHover('notStudent')}
-                        onMouseLeave={handleLeave}
-                    >
-                        <FaSignOutAlt className="text-xl" /> Not Student
-                    </Link>
+                            {/* Not Student Button */}
+                            <Link
+                                href={route('not_student')}
+                                className={`text-white flex items-center justify-center gap-2 px-6 py-3 rounded-lg transition transform ${hoveredButton === 'notStudent' ? 'bg-green-700 scale-105' : 'bg-green-500 hover:bg-green-700'} duration-300`}
+                                onMouseEnter={() => handleHover('notStudent')}
+                                onMouseLeave={handleLeave}
+                            >
+                                <FaSignOutAlt className="text-xl" /> Register
+                            </Link>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Contact Information */}
