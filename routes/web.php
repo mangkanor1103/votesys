@@ -15,6 +15,10 @@ use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\ElectionResultController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudentVerificationController;
+use App\Http\Controllers\PhotoController;
+
+Route::post('/upload-photo', [PhotoController::class, 'store'])->name('photo.store');
+
 
 Route::get('/api/candidates/{positionId}', [CandidateController::class, 'getCandidates']);
 
@@ -133,7 +137,7 @@ Route::get('/student', function () {
 })->name('student');
 
 Route::get('/not-student', function () {
-    return inertia('NotStudent'); // Render NotStudent.jsx
+    return inertia('UploadPhoto'); // Render NotStudent.jsx
 })->name('not_student');
 
 Route::get('/subdashboard', function () {
