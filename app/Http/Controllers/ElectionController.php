@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use App\Models\Candidate;
+use App\Models\Vote;
 
 class ElectionController extends Controller
 {
@@ -32,7 +33,7 @@ class ElectionController extends Controller
 }
 
 
-    
+
     public function getPositions($electionId)
 {
     $election = Election::with('positions')->findOrFail($electionId);
@@ -189,7 +190,7 @@ public function showElectionPage()
 {
     $election = Election::findOrFail($id);
     $election->delete();
-    
+
     return redirect()->route('elections.index')->with('success', 'Election deleted successfully!');
 }
 
@@ -218,5 +219,17 @@ public function showElectionPage()
         // Optionally, you can return a success message or redirect back
         return redirect()->route('elections.index')->with('success', 'Election updated successfully');
     }
+
+    public function clearVotes($electionId)
+{
+    try {
+        // Assuming there's a Vote model with the relationship to elections
+        Vote::where('election_id', $electionId)->delete();
+        return response()->json(['message' => 'Votes cleared successfully.'], 200);
+    } catch (\Exception $e) {
+        return response()->json(['message' => 'Error clearing votes: ' . $e->getMessage()], 500);
+    }
+}
+
 
 }

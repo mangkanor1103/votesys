@@ -22,6 +22,7 @@ Route::get('/re-student', function () {
 })->name('restudent');
 
 Route::post('/upload-photo', [PhotoController::class, 'store'])->name('photo.store');
+Route::post('/elections/{electionId}/clear', [ElectionController::class, 'clearVotes']);
 
 
 Route::get('/api/candidates/{positionId}', [CandidateController::class, 'getCandidates']);

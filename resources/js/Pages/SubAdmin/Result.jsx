@@ -50,31 +50,6 @@ export default function Welcome() {
         }
     };
 
-    const handleClearElection = async () => {
-        // Optional: show a confirmation prompt before clearing
-        if (window.confirm("Are you sure you want to clear all votes for this election?")) {
-            try {
-                const response = await fetch(`/api/elections/${electionId}/clear`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                if (response.ok) {
-                    alert('Election votes cleared successfully.');
-                    setVotes([]); // Clear votes from UI
-                    setChartData({}); // Reset chart data
-                } else {
-                    alert('Failed to clear election votes.');
-                }
-            } catch (error) {
-                console.error("Error clearing election:", error);
-                alert('Error clearing election votes.');
-            }
-        }
-    };
-
     const groupedVotes = votes.reduce((acc, vote) => {
         if (!acc[vote.position_id]) {
             acc[vote.position_id] = {};
@@ -219,14 +194,6 @@ export default function Welcome() {
                                     <p className="text-xl font-semibold">Election Name:</p>
                                     <p className="text-gray-800 text-2xl">{electionName}</p>
                                 </div>
-
-                                {/* Clear Election Button */}
-                                <button
-                                    onClick={handleClearElection}
-                                    className="mt-6 px-6 py-3 text-white bg-red-600 rounded-lg hover:bg-red-700"
-                                >
-                                    Clear Election
-                                </button>
 
                                 {/* Chart Section */}
                                 <div className="mt-6">
