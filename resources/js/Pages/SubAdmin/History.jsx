@@ -1,69 +1,9 @@
-import { Head, Link, useForm } from '@inertiajs/react';
-import React, { useEffect, useState } from 'react';
-import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt, FaBars } from 'react-icons/fa';
+import { Head, Link } from '@inertiajs/react';
+import React, { useState } from 'react';
+import { FaHome, FaRegFlag, FaUsers, FaChalkboardTeacher, FaSignOutAlt, FaBars, FaTools } from 'react-icons/fa';
 
 export default function Welcome() {
-    const { post } = useForm();
-    const [electionId, setElectionId] = useState('');
-    const [electionName, setElectionName] = useState('');
-    const [votes, setVotes] = useState([]);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    useEffect(() => {
-        const storedElectionId = localStorage.getItem('election_id');
-        const storedElectionName = localStorage.getItem('election_name');
-        setElectionId(storedElectionId || 'N/A');
-        setElectionName(storedElectionName || 'N/A');
-
-        if (storedElectionId) {
-            fetchVotes(storedElectionId);
-        }
-    }, []);
-
-    const fetchVotes = async (electionId) => {
-        try {
-            const response = await fetch(`/api/votes/${electionId}`);
-            const data = await response.json();
-
-            if (data && data.votes) {
-                setVotes(data.votes);
-            } else {
-                console.error("Votes data not available or malformed.");
-            }
-        } catch (error) {
-            console.error("Error fetching votes:", error);
-        }
-    };
-
-    const handleLogout = async () => {
-        try {
-            await post(route('logout'));
-            window.location.href = '/';
-        } catch (error) {
-            console.error("Logout failed:", error);
-        }
-    };
-
-    const groupedVotes = votes.reduce((acc, vote) => {
-        if (!acc[vote.position_id]) {
-            acc[vote.position_id] = {};
-        }
-
-        if (!acc[vote.position_id][vote.candidate_id]) {
-            acc[vote.position_id][vote.candidate_id] = 0;
-        }
-        acc[vote.position_id][vote.candidate_id] += 1;
-
-        return acc;
-    }, {});
-
-    const positionMap = votes.reduce((acc, vote) => {
-        const position = vote.position_id && vote.position.name;
-        if (position) {
-            acc[vote.position_id] = position;
-        }
-        return acc;
-    }, {});
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-green-700 to-teal-700">
@@ -126,7 +66,7 @@ export default function Welcome() {
                                 href={route('welcome')}
                                 className="text-white flex items-center gap-2 px-6 py-3 rounded-lg transition transform hover:bg-green-700 hover:scale-105 ease-in-out duration-300"
                             >
-                                <FaChalkboardTeacher className="text-xl" /> Logout
+                                <FaSignOutAlt className="text-xl" /> Logout
                             </Link>
                         </div>
                     </div>
@@ -139,64 +79,30 @@ export default function Welcome() {
                     <div className="overflow-hidden bg-white shadow-xl sm:rounded-lg border-t-4 border-green-500">
                         <div className="p-8 text-gray-900">
                             <h3 className="text-2xl font-medium text-green-600 mb-6">
-                                Results
+                                History Function
                             </h3>
                             <div className="mt-6 space-y-4">
                                 <div className="text-green-700 text-lg font-semibold">
-                                    <p className="text-xl font-semibold">Election Name:</p>
-                                    <p className="text-gray-800 text-2xl">{electionName}</p>
+                                    <p className="text-xl font-semibold">History Function:</p>
+                                    <p className="text-gray-800 text-2xl">Under Maintenance</p>
                                 </div>
 
-                                {/* Display results table */}
-                                <div className="space-y-4 mt-6">
-                                    {Object.keys(groupedVotes).length > 0 ? (
-                                        Object.keys(groupedVotes).map((positionId) => {
-                                            const candidateVotes = groupedVotes[positionId];
-                                            const maxVotes = Math.max(...Object.values(candidateVotes));
-                                            const winningCandidateId = Object.keys(candidateVotes).find(
-                                                (candidateId) => candidateVotes[candidateId] === maxVotes
-                                            );
-                                            const winningCandidate = votes.find(
-                                                (vote) => vote.candidate_id == winningCandidateId
-                                            );
-
-                                            return (
-                                                <div key={positionId} className="bg-gray-100 p-4 rounded-lg shadow-md">
-                                                    <h4 className="text-xl font-semibold text-green-700">
-                                                        Position Name: {positionMap[positionId] || 'N/A'}
-                                                    </h4>
-                                                    <table className="min-w-full mt-4">
-                                                        <thead>
-                                                            <tr>
-                                                                <th className="border px-4 py-2 text-left">Candidate Name</th>
-                                                                <th className="border px-4 py-2 text-left">Position</th>
-                                                                <th className="border px-4 py-2 text-left">Vote Count</th>
-                                                                <th className="border px-4 py-2 text-left">Winner</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {Object.keys(candidateVotes).map((candidateId) => {
-                                                                const candidate = votes.find(vote => vote.candidate_id == candidateId);
-                                                                if (candidate && candidate.candidate.name) {
-                                                                    return (
-                                                                        <tr key={candidateId}>
-                                                                            <td className="border px-4 py-2">{candidate.candidate.name}</td>
-                                                                            <td className="border px-4 py-2">{positionMap[positionId]}</td>
-                                                                            <td className="border px-4 py-2">{candidateVotes[candidateId]}</td>
-                                                                            <td className="border px-4 py-2">{winningCandidateId === candidateId ? 'Winner' : ''}</td>
-                                                                        </tr>
-                                                                    );
-                                                                }
-                                                                return null;
-                                                            })}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            );
-                                        })
-                                    ) : (
-                                        <p>No votes cast yet.</p>
-                                    )}
+                                {/* Maintenance Message */}
+                                <div className="space-y-4 mt-6 animate-pulse">
+                                    <div className="flex justify-center items-center gap-4">
+                                        <FaTools className="text-5xl text-red-600 animate-spin" />
+                                        <p className="text-center text-2xl text-red-600 animate-bounce">
+                                            The history function is currently under maintenance due to lack of time. Please check back later.
+                                        </p>
+                                    </div>
+                                    <div className="flex justify-center mt-4">
+                                        <div className="text-center">
+                                            <p className="text-lg text-gray-500">We are working hard to bring it back online!</p>
+                                            <div className="animate-ping mt-2">
+                                                <div className="w-4 h-4 bg-red-600 rounded-full"></div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
