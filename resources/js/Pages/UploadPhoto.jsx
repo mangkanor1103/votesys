@@ -5,6 +5,7 @@ import { Head } from '@inertiajs/react';
 export default function NotStudent() {
     const [photo, setPhoto] = useState(null);
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);  // State for loading
 
     const handlePhotoChange = (e) => {
         setPhoto(e.target.files[0]);
@@ -17,6 +18,8 @@ export default function NotStudent() {
             setError('Please select a photo to upload.');
             return;
         }
+
+        setLoading(true); // Set loading to true when starting the upload
 
         const formData = new FormData();
         formData.append('photo', photo);
@@ -33,6 +36,8 @@ export default function NotStudent() {
             }
         } catch (err) {
             setError(err.response?.data?.message || 'An error occurred during the upload.');
+        } finally {
+            setLoading(false); // Set loading to false after the upload attempt
         }
     };
 
@@ -68,7 +73,7 @@ export default function NotStudent() {
                         type="submit"
                         className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300 mb-4"
                     >
-                        Upload Photo
+                        {loading ? 'Uploading...' : 'Upload Photo'}
                     </button>
 
                     {/* Navigation Buttons */}
@@ -76,7 +81,7 @@ export default function NotStudent() {
                         <a
                             href="/"
                             className="w-full bg-green-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-700 transition duration-300 text-center"
-                            >
+                        >
                             Home
                         </a>
                     </div>
